@@ -204,6 +204,13 @@ app.post('/api/user/bind-qq', auth, [
   }
   try {
     const qqEmail = sanitize(req.body.qqEmail);
+
+    // Check: is this QQ email already bound to another user?
+    const existing = dbGet('SELECT id, username FROM users WHERE qq_email = ? AND id != ?', [qqEmail, req.userId]);
+    if (existing) {
+      return res.status(409).json({ error: '此QQ邮箱已被用户 ' + existing.username + ' 绑定' });
+    }
+
     dbRun("UPDATE users SET qq_email = ?, updated_at = datetime('now') WHERE id = ?", [qqEmail, req.userId]);
     res.json({ qqEmail, message: '绑定成功' });
   } catch (err) {
@@ -272,6 +279,27 @@ app.post('/api/auth/forgot-password', authLimiter, [
 });
 
 // Reset password — verify code and set new password
+
+
+// ── Admin: Clean up duplicate QQ email bindings (one-time) ──
+app.post('/api/admin/cleanup-dup-qq', (req, res) => {
+  try {
+    // Find all users with QQ emails that appear more than once
+    const dups = dbAll('SELECT qq_email, COUNT(*) as cnt FROM users WHERE qq_email != \'\' GROUP BY qq_email HAVING cnt > 1');
+    let cleaned = 0;
+    for (const row of dups) {
+      // Keep the first user's binding, clear the rest
+      const users = dbAll('SELECT id FROM users WHERE qq_email = ? ORDER BY id ASC', [row.qq_email]);
+      for (let i = 1; i < users.length; i++) {
+        dbRun("UPDATE users SET qq_email = '', updated_at = datetime('now') WHERE id = ?", [users[i].id]);
+        cleaned++;
+      }
+    }
+    res.json({ message: '清理完成', removedDuplicates: cleaned, duplicateEmails: dups.length });
+  } catch (err) {
+    res.status(500).json({ error: '清理失败' });
+  }
+});
 app.post('/api/auth/reset-password', authLimiter, [
   body('username').isString().isLength({ min: 1 }),
   body('code').isString().isLength({ min: 6, max: 6 }),
