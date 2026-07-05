@@ -9,11 +9,37 @@ import initSqlJs from 'sql.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import crypto from 'crypto';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3001;
-const JWT_SECRET = process.env.JWT_SECRET || 'bbtravel_jwt_secret_2026_change_in_prod';
-const DB_PATH = path.join(__dirname, 'data', 'bbuser.db');
+const DEFAULT_DEV_JWT_SECRET = 'bbtravel_jwt_secret_2026_change_in_prod';
+const isProduction = process.env.NODE_ENV === 'production' || Boolean(process.env.RAILWAY_ENVIRONMENT || process.env.RENDER || process.env.FLY_APP_NAME);
+const JWT_SECRET = process.env.JWT_SECRET || (isProduction ? '' : DEFAULT_DEV_JWT_SECRET);
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
+const DB_PATH = path.resolve(process.env.DB_PATH || path.join(process.env.DATA_DIR || path.join(__dirname, 'data'), 'bbuser.db'));
+const USERNAME_RE = /^[\p{L}\p{N}_-]{3,30}$/u;
+const QQ_EMAIL_RE = /^\d{5,12}@qq\.com$/;
+const DEEPSEEK_KEY_RE = /^sk-[A-Za-z0-9_-]{20,200}$/;
+const ALLOWED_MODELS = new Set(['deepseek-chat', 'deepseek-reasoner', 'deepseek-v4-pro']);
+const DEFAULT_ALLOWED_ORIGINS = [
+  'http://localhost:8787',
+  'http://127.0.0.1:8787',
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
+];
+const configuredOrigins = new Set([
+  ...DEFAULT_ALLOWED_ORIGINS,
+  ...String(process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+]);
+const netlifyOriginPattern = /^https:\/\/[a-z0-9-]+\.netlify\.app$/i;
+
+if (!JWT_SECRET || (isProduction && JWT_SECRET === DEFAULT_DEV_JWT_SECRET) || (isProduction && JWT_SECRET.length < 32)) {
+  throw new Error('JWT_SECRET must be set to a strong secret in production');
+}
 
 // ── Database Setup ──────────────────────────────────
 let db;
@@ -74,14 +100,54 @@ function dbAll(sql, params = []) {
 
 // ── Express App ─────────────────────────────────────
 const app = express();
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors({
+  credentials: true,
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (configuredOrigins.has(origin) || netlifyOriginPattern.test(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS origin blocked'));
+  },
+}));
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: '请求过于频繁，请稍后重试' },
+}));
 app.use(express.json({ limit: '1mb' }));
+app.use((err, req, res, next) => {
+  if (err?.type === 'entity.too.large') {
+    return res.status(413).json({ error: '请求体过大' });
+  }
+  if (err instanceof SyntaxError && 'body' in err) {
+    return res.status(400).json({ error: 'JSON格式错误' });
+  }
+  if (err?.message === 'CORS origin blocked') {
+    return res.status(403).json({ error: '来源不允许' });
+  }
+  return next(err);
+});
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 30,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
   message: { error: '请求过于频繁，请15分钟后重试' }
+});
+
+const aiLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 40,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'AI请求过于频繁，请稍后重试' }
 });
 
 // ── Middleware ───────────────────────────────────────
@@ -100,47 +166,99 @@ function auth(req, res, next) {
   }
 }
 
-// Safe string equals — compare length then each char
-function safeEqual(a, b) {
+function timingSafeStringEqual(a, b) {
   if (typeof a !== 'string' || typeof b !== 'string') return false;
-  if (a.length !== b.length) return false;
-  let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
-  return result === 0;
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  return crypto.timingSafeEqual(ab, bb);
 }
 
-// Sanitize input — strip SQL-injection vectors and XSS chars
-function sanitize(str) {
+function normalizeString(str, max = 100) {
   if (typeof str !== 'string') return '';
-  return str.replace(/[<>"'%;()&\/\\]/g, '').trim();
+  return str.trim().slice(0, max);
+}
+
+function normalizeUsername(username) {
+  return normalizeString(username, 30);
+}
+
+function normalizeQQEmail(email) {
+  return normalizeString(email, 40).toLowerCase();
+}
+
+function validateRequest(req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ error: errors.array()[0]?.msg || '请求参数不正确' });
+    return false;
+  }
+  return true;
+}
+
+function requireAdminToken(req, res, next) {
+  if (!ADMIN_TOKEN) return res.status(404).json({ error: 'Not found' });
+  const header = req.headers.authorization || '';
+  const bearer = header.startsWith('Bearer ') ? header.slice(7) : '';
+  const token = req.get('x-admin-token') || bearer;
+  if (!timingSafeStringEqual(token, ADMIN_TOKEN)) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  next();
+}
+
+function validateDeepSeekKey(apiKey) {
+  return DEEPSEEK_KEY_RE.test(apiKey);
+}
+
+function clampNumber(value, fallback, min, max) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
+
+function normalizeMessages(messages) {
+  if (!Array.isArray(messages) || messages.length === 0 || messages.length > 20) return null;
+  const roles = new Set(['system', 'user', 'assistant']);
+  const clean = [];
+  for (const msg of messages) {
+    if (!msg || typeof msg !== 'object') return null;
+    const role = String(msg.role || '').trim();
+    const content = typeof msg.content === 'string' ? msg.content : '';
+    if (!roles.has(role) || content.length < 1 || content.length > 16000) return null;
+    clean.push({ role, content });
+  }
+  return clean;
+}
+
+async function fetchWithTimeout(url, options, timeoutMs = 30000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 // ── Routes ──────────────────────────────────────────
 
 // Register
 app.post('/api/auth/register', authLimiter, [
-  body('username').isString().isLength({ min: 3, max: 30 }),
-  body('password').isString().isLength({ min: 6, max: 100 }),
+  body('username').isString().trim().matches(USERNAME_RE).withMessage('用户名仅支持中英文、数字、下划线和短横线，长度3-30字符'),
+  body('password').isString().isLength({ min: 8, max: 100 }).withMessage('密码至少8字符'),
 ], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ error: '用户名3-30字符，密码至少6字符' });
-  }
+  if (!validateRequest(req, res)) return;
   try {
-    const username = sanitize(req.body.username);
+    const username = normalizeUsername(req.body.username);
     const password = req.body.password;
 
-    // Check existing — parameterized query
     const existing = dbGet('SELECT id FROM users WHERE username = ?', [username]);
     if (existing) {
-      if (safeEqual(String(existing.id), String(existing.id))) {
-        return res.status(409).json({ error: '用户名已存在' });
-      }
+      return res.status(409).json({ error: '用户名已存在' });
     }
 
-    const hashed = await bcrypt.hash(password, 10);
+    const hashed = await bcrypt.hash(password, 12);
     dbRun('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashed]);
 
     const user = dbGet('SELECT id FROM users WHERE username = ?', [username]);
@@ -154,15 +272,12 @@ app.post('/api/auth/register', authLimiter, [
 
 // Login
 app.post('/api/auth/login', authLimiter, [
-  body('username').isString().isLength({ min: 1 }),
-  body('password').isString().isLength({ min: 1 }),
+  body('username').isString().trim().matches(USERNAME_RE).withMessage('用户名格式不正确'),
+  body('password').isString().isLength({ min: 1, max: 100 }).withMessage('请输入密码'),
 ], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ error: '请输入用户名和密码' });
-  }
+  if (!validateRequest(req, res)) return;
   try {
-    const username = sanitize(req.body.username);
+    const username = normalizeUsername(req.body.username);
     const password = req.body.password;
 
     const user = dbGet('SELECT * FROM users WHERE username = ?', [username]);
@@ -196,14 +311,11 @@ app.get('/api/user/profile', auth, (req, res) => {
 
 // Bind QQ email
 app.post('/api/user/bind-qq', auth, [
-  body('qqEmail').isString().matches(/^\d{5,12}@qq\.com$/),
+  body('qqEmail').isString().trim().matches(QQ_EMAIL_RE).withMessage('请输入正确的QQ邮箱格式'),
 ], (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ error: '请输入正确的QQ邮箱格式' });
-  }
+  if (!validateRequest(req, res)) return;
   try {
-    const qqEmail = sanitize(req.body.qqEmail);
+    const qqEmail = normalizeQQEmail(req.body.qqEmail);
 
     // Check: is this QQ email already bound to another user?
     const existing = dbGet('SELECT id, username FROM users WHERE qq_email = ? AND id != ?', [qqEmail, req.userId]);
@@ -219,11 +331,11 @@ app.post('/api/user/bind-qq', auth, [
 });
 
 // Store verification codes in memory (with expiry)
-const verificationCodes = new Map(); // username -> {code, expires, attempts}
+const verificationCodes = new Map(); // username -> {code, expires, requests, failures}
 
 // Generate 6-digit code
 function generateCode() {
-  return String(Math.floor(100000 + Math.random() * 900000));
+  return String(crypto.randomInt(100000, 1000000));
 }
 
 // Clean expired codes every 5 minutes
@@ -236,16 +348,13 @@ setInterval(() => {
 
 // Forgot password — send verification code to QQ email
 app.post('/api/auth/forgot-password', authLimiter, [
-  body('username').isString().isLength({ min: 1 }),
-  body('qqEmail').isString().matches(/^\d{5,12}@qq\.com$/),
+  body('username').isString().trim().matches(USERNAME_RE).withMessage('用户名格式不正确'),
+  body('qqEmail').isString().trim().matches(QQ_EMAIL_RE).withMessage('请输入正确的QQ邮箱'),
 ], (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ error: '请输入正确的用户名和QQ邮箱' });
-  }
+  if (!validateRequest(req, res)) return;
   try {
-    const username = sanitize(req.body.username);
-    const qqEmail = sanitize(req.body.qqEmail);
+    const username = normalizeUsername(req.body.username);
+    const qqEmail = normalizeQQEmail(req.body.qqEmail);
 
     const user = dbGet('SELECT id, qq_email FROM users WHERE username = ?', [username]);
     if (!user) {
@@ -257,20 +366,19 @@ app.post('/api/auth/forgot-password', authLimiter, [
 
     // Check rate limit for this username
     const existing = verificationCodes.get(username);
-    if (existing && existing.attempts >= 3 && Date.now() < existing.expires) {
+    if (existing && existing.requests >= 3 && Date.now() < existing.expires) {
       return res.status(429).json({ error: '请求过于频繁，请10分钟后重试' });
     }
 
     const code = generateCode();
-    verificationCodes.set(username, { code, expires: Date.now() + 600000, attempts: (existing?.attempts || 0) + 1 });
+    verificationCodes.set(username, { code, expires: Date.now() + 600000, requests: (existing?.requests || 0) + 1, failures: 0 });
 
     // Try to send email via SMTP, but don't block the response
     if (process.env.SMTP_HOST) {
-      // SMTP sending would go here — for now, return code for dev
-      res.json({ message: '验证码已发送到QQ邮箱', devCode: code });
+      // SMTP sending would go here.
+      res.json({ message: '验证码已发送到QQ邮箱', ...(isProduction ? {} : { devCode: code }) });
     } else {
-      // Dev mode: return code directly
-      res.json({ message: '验证码已生成', devCode: code, note: 'SMTP未配置，验证码直接显示' });
+      res.json({ message: isProduction ? '验证码服务暂未配置，请联系管理员' : '验证码已生成', ...(isProduction ? {} : { devCode: code, note: 'SMTP未配置，验证码直接显示' }) });
     }
   } catch (err) {
     console.error('Forgot password error:', err);
@@ -282,7 +390,7 @@ app.post('/api/auth/forgot-password', authLimiter, [
 
 
 // ── Admin: Clean up duplicate QQ email bindings (one-time) ──
-app.post('/api/admin/cleanup-dup-qq', (req, res) => {
+app.post('/api/admin/cleanup-dup-qq', requireAdminToken, (req, res) => {
   try {
     // Find all users with QQ emails that appear more than once
     const dups = dbAll('SELECT qq_email, COUNT(*) as cnt FROM users WHERE qq_email != \'\' GROUP BY qq_email HAVING cnt > 1');
@@ -301,28 +409,30 @@ app.post('/api/admin/cleanup-dup-qq', (req, res) => {
   }
 });
 app.post('/api/auth/reset-password', authLimiter, [
-  body('username').isString().isLength({ min: 1 }),
-  body('code').isString().isLength({ min: 6, max: 6 }),
-  body('newPassword').isString().isLength({ min: 6, max: 100 }),
+  body('username').isString().trim().matches(USERNAME_RE).withMessage('用户名格式不正确'),
+  body('code').isString().trim().matches(/^\d{6}$/).withMessage('请输入6位验证码'),
+  body('newPassword').isString().isLength({ min: 8, max: 100 }).withMessage('新密码至少8字符'),
 ], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ error: '请输入正确的验证码和新密码' });
-  }
+  if (!validateRequest(req, res)) return;
   try {
-    const username = sanitize(req.body.username);
-    const code = sanitize(req.body.code);
+    const username = normalizeUsername(req.body.username);
+    const code = normalizeString(req.body.code, 6);
     const newPassword = req.body.newPassword;
 
     const stored = verificationCodes.get(username);
     if (!stored || Date.now() > stored.expires) {
       return res.status(400).json({ error: '验证码已过期，请重新获取' });
     }
-    if (stored.code !== code) {
+    if ((stored.failures || 0) >= 5) {
+      verificationCodes.delete(username);
+      return res.status(429).json({ error: '验证码错误次数过多，请重新获取' });
+    }
+    if (!timingSafeStringEqual(stored.code, code)) {
+      stored.failures = (stored.failures || 0) + 1;
       return res.status(400).json({ error: '验证码错误' });
     }
 
-    const hashed = await bcrypt.hash(newPassword, 10);
+    const hashed = await bcrypt.hash(newPassword, 12);
     dbRun("UPDATE users SET password = ?, updated_at = datetime('now') WHERE username = ?", [hashed, username]);
     
     verificationCodes.delete(username);
@@ -334,12 +444,9 @@ app.post('/api/auth/reset-password', authLimiter, [
 });
 app.post('/api/auth/change-password', auth, [
   body('oldPassword').isString().isLength({ min: 1 }),
-  body('newPassword').isString().isLength({ min: 6, max: 100 }),
+  body('newPassword').isString().isLength({ min: 8, max: 100 }).withMessage('新密码至少8个字符'),
 ], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ error: '新密码至少6个字符' });
-  }
+  if (!validateRequest(req, res)) return;
   try {
     const user = dbGet('SELECT * FROM users WHERE id = ?', [req.userId]);
     if (!user) return res.status(404).json({ error: '用户不存在' });
@@ -347,11 +454,64 @@ app.post('/api/auth/change-password', auth, [
     const match = await bcrypt.compare(req.body.oldPassword, user.password);
     if (!match) return res.status(401).json({ error: '原密码错误' });
 
-    const hashed = await bcrypt.hash(req.body.newPassword, 10);
+    const hashed = await bcrypt.hash(req.body.newPassword, 12);
     dbRun("UPDATE users SET password = ?, updated_at = datetime('now') WHERE id = ?", [hashed, req.userId]);
     res.json({ message: '密码已修改' });
   } catch (err) {
     res.status(500).json({ error: '服务器错误' });
+  }
+});
+
+// DeepSeek proxy — avoids browser CORS failures on Netlify static frontend.
+app.post('/api/ai/models', aiLimiter, [
+  body('apiKey').isString().trim().matches(DEEPSEEK_KEY_RE).withMessage('请填写有效的 DeepSeek API Key'),
+], async (req, res) => {
+  if (!validateRequest(req, res)) return;
+  const apiKey = String(req.body?.apiKey || '').trim();
+  if (!validateDeepSeekKey(apiKey)) return res.status(400).json({ error: '请填写有效的 DeepSeek API Key' });
+
+  try {
+    const upstream = await fetchWithTimeout('https://api.deepseek.com/v1/models', {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    }, 15000);
+    const text = await upstream.text();
+    res.status(upstream.status).type(upstream.headers.get('content-type') || 'application/json').send(text);
+  } catch (err) {
+    console.error('DeepSeek models proxy error:', err);
+    res.status(502).json({ error: '无法连接 DeepSeek，请稍后重试或检查服务器网络' });
+  }
+});
+
+app.post('/api/ai/chat', auth, aiLimiter, [
+  body('apiKey').isString().trim().matches(DEEPSEEK_KEY_RE).withMessage('请先配置有效的 DeepSeek API Key'),
+  body('model').optional().isString().trim().isLength({ min: 1, max: 60 }).withMessage('模型名称不正确'),
+  body('messages').isArray({ min: 1, max: 20 }).withMessage('对话内容不正确'),
+], async (req, res) => {
+  if (!validateRequest(req, res)) return;
+  const apiKey = String(req.body?.apiKey || '').trim();
+  const model = String(req.body?.model || 'deepseek-chat').trim();
+  const messages = normalizeMessages(req.body?.messages);
+  const temperature = clampNumber(req.body?.temperature, 0.7, 0, 2);
+  const max_tokens = Math.round(clampNumber(req.body?.max_tokens, 4096, 1, 8192));
+
+  if (!validateDeepSeekKey(apiKey)) return res.status(400).json({ error: '请先配置有效的 DeepSeek API Key' });
+  if (!ALLOWED_MODELS.has(model)) return res.status(400).json({ error: '模型不在允许列表内' });
+  if (!messages) return res.status(400).json({ error: '对话内容过长或格式不正确' });
+
+  try {
+    const upstream = await fetchWithTimeout('https://api.deepseek.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({ model, messages, temperature, max_tokens }),
+    }, 60000);
+    const text = await upstream.text();
+    res.status(upstream.status).type(upstream.headers.get('content-type') || 'application/json').send(text);
+  } catch (err) {
+    console.error('DeepSeek chat proxy error:', err);
+    res.status(502).json({ error: 'AI 服务暂时不可达，请检查后端部署网络或稍后重试' });
   }
 });
 
@@ -360,13 +520,22 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
 
-// Static files — only in local dev (skip on Render — frontend is on Netlify)
-if (!process.env.RENDER) {
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: '接口不存在' });
+});
+
+// Static files — local dev only unless explicitly enabled.
+if (!isProduction || process.env.SERVE_STATIC === 'true') {
   app.use(express.static(path.join(__dirname, '..', 'cloudflare-deploy')));
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'cloudflare-deploy', 'index.html'));
   });
 }
+
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: '服务器错误' });
+});
 
 // ── Start ───────────────────────────────────────────
 await initDB();
