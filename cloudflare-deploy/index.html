@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>冰冰出行</title>
+<meta http-equiv=Cache-Control content=no-cache,no-store,must-revalidate>
+<meta name="theme-color" content="#4A90D9">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="冰冰出行">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="manifest" href="/manifest.json">
+<style>:root{
+  --bg:#FAFAFA;--paper:#FFFFFF;--ink:#1A1A1E;--ink2:#48484C;--muted:#8E8E93;
+  --accent:#00B894;--accent-glow:rgba(0,184,148,.12);--online:#34C759;
+  --border:rgba(0,184,148,.14);--border2:rgba(0,0,0,.06);
+  --r:14px;--r2:22px;--r3:34px;
+  --sb:env(safe-area-inset-bottom,0);
+  --font-display:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  --font-body:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  --msg-user:linear-gradient(135deg,#00B894,#009974);
+  --msg-ai:#FFFFFF;
+  --glass:rgba(255,255,255,.82);
+  --glass-border:rgba(0,184,148,.18);
+  --blur:saturate(1.6) blur(28px);
+  --glass-shadow:0 12px 40px rgba(0,0,0,.08),0 0 24px rgba(0,184,148,.04),inset 0 1px 0 rgba(255,255,255,.6);
+  --shadow-sm:0 1px 3px rgba(0,0,0,.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-body);color:var(--ink);line-height:1.6;height:100dvh;display:flex;flex-direction:column;overflow:hidden;-webkit-font-smoothing:antialiased;padding-bottom:var(--sb);background:var(--bg)}
+.serif{font-family:var(--font-display)}
+
+/* Topbar — Mineradio glass */
+.tb{background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);color:var(--ink);padding:12px 18px;display:flex;align-items:center;gap:14px;flex-shrink:0;z-index:10;border-bottom:1px solid var(--glass-border);box-shadow:0 4px 24px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.8)}
+.tb-l{display:flex;align-items:center;gap:10px}
+.tb-l .ic{width:36px;height:36px;background:linear-gradient(135deg,#4A90D9,#6BB5FF);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff}
+.tb-l span{font-weight:700;font-size:17px;letter-spacing:-.01em;color:var(--ink)}
+.tb-sp{flex:1}
+.tb-install{font-size:11px;padding:7px 16px;border:1px solid var(--border);background:rgba(255,255,255,.72);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);color:var(--accent);border-radius:10px;cursor:pointer;font-weight:600;transition:all .18s;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.tb-install:active{background:rgba(0,184,148,.08);border-color:rgba(0,184,148,.28);transform:translateY(-1px)}
+.tb-btn{width:34px;height:34px;border:1px solid var(--border);background:rgba(255,255,255,.72);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);color:var(--ink2);border-radius:10px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .18s;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.tb-btn:active{background:rgba(0,184,148,.08);border-color:rgba(0,184,148,.28);color:var(--accent);transform:translateY(-1px)}
+.tb-badge{font-size:11px;color:var(--muted);font-weight:500;background:var(--border2);padding:3px 10px;border-radius:12px}
+
+.view{flex:1;display:none;flex-direction:column;overflow:hidden}.view.on{display:flex}
+
+/* Chat — Telegram style */
+.chat-hist{flex:1;overflow-y:auto;padding:16px 14px 8px;display:flex;flex-direction:column;gap:6px}
+.chat-hist::-webkit-scrollbar{width:4px}.chat-hist::-webkit-scrollbar-track{background:transparent}.chat-hist::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:2px}
+.msg{max-width:80%;padding:10px 14px;border-radius:var(--r);font-size:14px;line-height:1.55;animation:msgIn .2s ease-out;position:relative}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.msg.u{align-self:flex-end;background:var(--msg-user);color:#fff;border-bottom-right-radius:4px;box-shadow:0 1px 4px rgba(74,144,217,.2)}
+.msg.a{align-self:flex-start;background:var(--msg-ai);color:var(--ink);border-bottom-left-radius:4px;box-shadow:var(--shadow-sm)}
+.msg.s{align-self:center;background:transparent;color:var(--muted);font-size:12px;padding:4px 0}
+/* Time stamp — Telegram style */
+.msg .time{display:block;text-align:right;font-size:10px;opacity:.6;margin-top:4px;letter-spacing:.02em}
+.msg.u .time{color:rgba(255,255,255,.7)}
+.msg.a .time{color:var(--muted)}
+.msg .bar{height:3px;background:rgba(0,0,0,.06);border-radius:2px;margin-top:8px;overflow:hidden}
+.msg .fill{height:100%;background:linear-gradient(90deg,#00B894,#00D9A6);border-radius:2px;transition:width .5s ease-out}
+.msg .acts{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.msg .mbtn{font-size:10px;padding:4px 10px;border:1px solid var(--border2);border-radius:12px;background:var(--paper);cursor:pointer;color:var(--ink2);transition:all .15s;font-weight:500}
+.msg .mbtn:active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* Typing indicator */
+.typing{display:flex;gap:4px;padding:8px 0}
+.typing span{width:7px;height:7px;background:var(--muted);border-radius:50%;animation:typingBounce 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0);opacity:.3}30%{transform:translateY(-6px);opacity:1}}
+
+/* Input */
+.chat-inp{padding:12px 16px 16px;background:var(--paper);flex-shrink:0;border-top:1px solid var(--border)}
+.chat-row{display:flex;gap:10px;align-items:flex-end}
+.chat-row textarea{flex:1;border:1px solid var(--border2);border-radius:14px;padding:12px 18px;font-size:14px;font-family:var(--font-body);resize:none;min-height:48px;max-height:110px;background:rgba(255,255,255,.72);backdrop-filter:var(--blur);color:var(--ink);transition:all .2s;line-height:1.5}
+.chat-row textarea:focus{outline:none;border-color:rgba(0,184,148,.36);box-shadow:0 0 0 3px rgba(0,184,148,.08)}
+.chat-row textarea::placeholder{color:var(--muted)}
+.sbtn{width:48px;height:48px;border:none;background:var(--accent);color:#fff;border-radius:50%;font-size:20px;cursor:pointer;flex-shrink:0;transition:all .15s;font-weight:600;box-shadow:0 2px 10px rgba(74,144,217,.25)}
+.sbtn:active{transform:scale(.92)}.sbtn:disabled{opacity:.35;box-shadow:none;transform:none}
+.chips{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.chip{padding:7px 14px;border:1px solid var(--border2);border-radius:16px;font-size:12px;background:var(--paper);cursor:pointer;color:var(--ink2);transition:all .15s;font-weight:500}
+.chip:active{background:var(--accent);color:#fff;border-color:var(--accent);transform:scale(.96)}
+
+/* Preview */
+.pframe{flex:1;border:none;width:100%;background:#fff}
+.pempty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);padding:24px;text-align:center;background:linear-gradient(180deg,var(--bg),#fff 60%)}
+.pempty .ic{font-size:48px;margin-bottom:24px;opacity:.3;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.pempty h3{font-family:var(--font-display);font-size:24px;color:var(--ink);margin-bottom:10px;letter-spacing:-.02em}
+.pempty p{font-size:13px;max-width:260px;color:var(--muted);line-height:1.7}
+.ptop{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--paper);border-bottom:1px solid var(--border);flex-shrink:0}
+.ptop .url{flex:1;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.ptop button{font-size:11px;padding:6px 12px;border:1px solid var(--border2);border-radius:14px;background:var(--paper);cursor:pointer;color:var(--ink);white-space:nowrap;transition:all .15s;font-weight:500}
+.ptop button.accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+.ptop button:active{opacity:.8}
+
+/* Plans */
+.pcard{padding:16px 18px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .1s;background:var(--paper)}
+.pcard:active{background:var(--bg)}.pcard:last-child{border-bottom:none}
+.pcard .pi{flex:1;min-width:0}.pcard .pt{font-weight:600;font-size:14px;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcard .pm{font-size:11px;color:var(--muted)}.pcard .pd{font-size:15px;padding:6px;cursor:pointer;color:var(--muted);background:none;border:none;opacity:.4}
+.pcard .pd:active{opacity:.8}
+
+/* Settings */
+.so{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:flex-end;backdrop-filter:blur(4px)}.so.on{display:flex}
+.sm{background:var(--paper);border-radius:var(--r3) var(--r3) 0 0;width:100%;max-height:85vh;overflow-y:auto;padding:28px 24px calc(28px+var(--sb));animation:su .25s ease-out}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sm h3{font-family:var(--font-display);font-size:22px;margin-bottom:8px;letter-spacing:-.01em}
+.sm .desc{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.7}
+.sf{margin-bottom:18px}.sf label{display:block;font-size:10px;font-weight:700;margin-bottom:6px;color:var(--ink2);text-transform:uppercase;letter-spacing:.08em}
+.sf input{width:100%;padding:14px 18px;border:1.5px solid var(--border2);border-radius:12px;font-size:14px;font-family:var(--font-body);background:var(--bg);color:var(--ink);transition:all .15s}
+.sf input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.sa{display:flex;gap:10px;margin-top:24px}.sa button{flex:1;padding:15px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:all .15s}
+.sa button:active{transform:scale(.97)}.bsave{background:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(74,144,217,.2)}.btest{background:transparent;color:var(--ink);border:1.5px solid var(--border2)!important}.bcancel{background:transparent;color:var(--muted)}
+
+/* Toast */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:200;padding:10px 22px;border-radius:20px;font-size:13px;font-weight:600;color:#fff;background:var(--ink);text-align:center;animation:ti .2s ease-out,to 1.6s 1.4s forwards;box-shadow:0 6px 20px rgba(0,0,0,.15)}
+.toast.e{background:#E84A5F}@keyframes ti{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}@keyframes to{to{opacity:0;transform:translateX(-50%) translateY(-4px)}}
+
+/* Bottom Nav — Mineradio glass */
+.bnav{display:flex;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-top:1px solid var(--glass-border);flex-shrink:0;padding-bottom:var(--sb);box-shadow:0 -4px 24px rgba(0,0,0,.06),inset 0 -1px 0 rgba(255,255,255,.6)}
+.bnav button{flex:1;text-align:center;padding:10px 4px;border:none;background:transparent;cursor:pointer;font-size:10px;color:var(--muted);font-family:var(--font-body);font-weight:500;letter-spacing:.04em;text-transform:uppercase;transition:all .15s}
+.bnav button .ni{display:block;font-size:20px;margin-bottom:3px;transition:transform .2s}
+.bnav button.on{color:var(--accent);font-weight:700}.bnav button.on .ni{filter:grayscale(0);opacity:1}
+.bnav button .ni{opacity:.4;transition:all .2s}
+
+/* ── About Tab ── */
+.about{flex:1;overflow-y:auto;padding:24px 20px 12px;background:linear-gradient(180deg,var(--paper),var(--bg))}
+.about .hero{text-align:center;padding:28px 12px 24px;margin-bottom:20px;background:linear-gradient(135deg,#4A90D9,#357ABD);border-radius:24px;color:#fff;position:relative;overflow:hidden}
+.about .hero::before{content:'';position:absolute;top:-50%;right:-30%;width:200px;height:200px;background:rgba(255,255,255,.06);border-radius:50%}
+.about .hero::after{content:'';position:absolute;bottom:-30%;left:-20%;width:160px;height:160px;background:rgba(255,255,255,.05);border-radius:50%}
+.about .hero .icon{font-size:42px;margin-bottom:8px;position:relative;z-index:1}
+.about .hero h2{font-family:var(--font-display);font-size:26px;font-weight:400;letter-spacing:.02em;position:relative;z-index:1}
+.about .hero p{font-size:13px;opacity:.75;margin-top:6px;position:relative;z-index:1}
+.about .step{display:flex;gap:16px;padding:18px 20px;background:var(--paper);border-radius:18px;margin-bottom:14px;box-shadow:var(--shadow-sm);border:1px solid var(--border);transition:all .2s}
+.about .step:active{transform:scale(.98);box-shadow:var(--shadow-md)}
+.about .step .num{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#6BB5FF);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;font-family:var(--font-display)}
+.about .step .info{flex:1}
+.about .step .info h4{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.about .step .info p{font-size:12px;color:var(--muted);line-height:1.5}
+.about .tips{background:var(--paper);border-radius:18px;padding:18px 20px;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-top:6px}
+.about .tips h4{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px}
+.about .tips li{font-size:12px;color:var(--ink2);padding:6px 0;border-bottom:1px solid var(--border);list-style:none}
+.about .tips li:last-child{border-bottom:none}
+.about .tips li::before{content:'✨ ';font-size:11px}
+
+/* ── Auth / Account Panel ── */
+.auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:150;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px)}.auth-overlay.on{display:flex}
+.auth-box{background:var(--paper);border-radius:28px;width:88%;max-width:380px;padding:32px 28px;animation:su .3s ease-out;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.auth-box .logo{text-align:center;margin-bottom:20px}
+.auth-box .logo .ic{font-size:36px;margin-bottom:4px}
+.auth-box .logo h2{font-family:var(--font-display);font-size:24px;color:var(--ink);letter-spacing:-.01em}
+.auth-box .logo p{font-size:12px;color:var(--muted);margin-top:2px}
+.auth-box .field{margin-bottom:16px}
+.auth-box .field label{display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:5px;letter-spacing:.04em}
+.auth-box .field input{width:100%;padding:14px 16px;border:1.5px solid var(--border2);border-radius:14px;font-size:14px;font-family:var(--font-body);background:var(--bg);color:var(--ink);transition:all .2s}
+.auth-box .field input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.auth-box .field .err{font-size:11px;color:#E84A5F;margin-top:4px;display:none}
+.auth-box .actions{display:flex;gap:10px;margin-top:24px}
+.auth-box .actions button{flex:1;padding:14px;border-radius:16px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:all .15s}
+.auth-box .actions button:active{transform:scale(.96)}
+.auth-box .actions .primary{background:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(74,144,217,.2)}
+.auth-box .actions .secondary{background:transparent;color:var(--ink);border:1.5px solid var(--border2)!important}
+.auth-box .switch{text-align:center;margin-top:16px;font-size:12px;color:var(--muted)}
+.auth-box .switch a{color:var(--accent);cursor:pointer;font-weight:600;text-decoration:none}
+
+/* ── Account (after login) ── */
+.acct-panel{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:flex-end;backdrop-filter:blur(4px)}.acct-panel.on{display:flex}
+.acct-box{background:var(--paper);border-radius:28px 28px 0 0;width:100%;max-height:85vh;overflow-y:auto;padding:28px 24px calc(28px+var(--sb));animation:su .25s ease-out}
+.acct-box .head{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.acct-box .head .avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#4A90D9,#6BB5FF);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;font-weight:700}
+.acct-box .head .info h3{font-size:17px;font-weight:700;color:var(--ink)}
+.acct-box .head .info p{font-size:12px;color:var(--muted)}
+.acct-box .card{border:1px solid var(--border);border-radius:16px;padding:16px 18px;margin-bottom:12px;background:var(--bg)}
+.acct-box .card h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2);margin-bottom:10px}
+.acct-box .card .row{display:flex;justify-content:space-between;align-items:center;padding:6px 0}
+.acct-box .card .row span{font-size:13px;color:var(--ink)}
+.acct-box .card .row .val{font-size:12px;color:var(--muted)}
+.acct-box .card .row .btn{font-size:11px;padding:6px 14px;border-radius:12px;border:1px solid var(--border2);background:transparent;cursor:pointer;color:var(--ink);transition:all .15s;font-family:var(--font-body)}
+.acct-box .card .row .btn:active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.acct-box .card input{width:100%;padding:10px 14px;border:1.5px solid var(--border2);border-radius:10px;font-size:13px;font-family:var(--font-body);background:var(--paper);color:var(--ink);margin-top:6px}
+.acct-box .card input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.acct-box .logout{width:100%;padding:14px;border:1.5px solid #E84A5F;border-radius:16px;background:transparent;color:#E84A5F;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);margin-top:12px;transition:all .15s}
+.acct-box .logout:active{background:#E84A5F;color:#fff}
+
+/* ── Install Modal ── */
+.install-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:180;display:none;align-items:center;justify-content:center;backdrop-filter:blur(12px)}.install-modal.on{display:flex}
+.install-box{background:var(--paper);border-radius:32px;width:82%;max-width:340px;padding:36px 28px 28px;text-align:center;animation:su .35s ease-out;box-shadow:0 25px 80px rgba(0,0,0,.2)}
+.install-box .icon{font-size:52px;margin-bottom:14px;animation:float 2s ease-in-out infinite}
+.install-box h3{font-family:var(--font-display);font-size:24px;color:var(--ink);margin-bottom:6px;letter-spacing:-.01em}
+.install-box p{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px}
+.install-box .steps{text-align:left;background:var(--bg);border-radius:16px;padding:16px 18px;margin-bottom:20px}
+.install-box .steps li{font-size:12px;color:var(--ink2);padding:5px 0;list-style:none;line-height:1.6}
+.install-box .steps li::before{content:'📱 '}
+.install-box .actions{display:flex;gap:10px}
+.install-box .actions button{flex:1;padding:14px;border-radius:16px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);border:none;transition:all .15s}
+.install-box .actions button:active{transform:scale(.96)}
+.install-box .actions .primary{background:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(74,144,217,.2)}
+.install-box .actions .secondary{background:transparent;color:var(--muted);border:1.5px solid var(--border2)!important}
+
+/* ── Loading Progress ── */
+.msg .progress-wrap{display:flex;align-items:center;gap:8px;margin-top:6px}
+.msg .progress-wrap .bar-wrap{flex:1;height:4px;background:rgba(0,0,0,.06);border-radius:2px;overflow:hidden}
+.msg .progress-wrap .bar-wrap .fill{height:100%;background:linear-gradient(90deg,var(--accent),#6BB5FF);border-radius:2px;transition:width .3s ease-out}
+.msg .progress-wrap .pct{font-size:10px;color:var(--muted);min-width:32px;text-align:right;font-variant-numeric:tabular-nums}
+.msg .status-text{font-size:12px;color:var(--accent);margin-top:3px;font-weight:500;animation:pulse 1.5s ease-in-out infinite}@keyframes pulse{0%,100%{opacity:.7}50%{opacity:1}}
+@keyframes splash-line{0%,100%{opacity:.5;transform:scaleX(.8)}50%{opacity:1;transform:scaleX(1.05)}}
+@keyframes splash-pulse{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* Fable-style motion refresh for Netlify static build */
+:root{
+  --bg:#07111B;--paper:rgba(10,23,36,.72);--ink:#F8F4EC;--ink2:#D7D0C4;--muted:#8E9CA4;
+  --accent:#D8B76A;--accent-glow:rgba(216,183,106,.18);--online:#8CBBAE;
+  --border:rgba(255,255,255,.14);--border2:rgba(255,255,255,.10);
+  --msg-user:linear-gradient(135deg,#D8B76A,#8CBBAE);
+  --msg-ai:rgba(255,255,255,.10);
+  --glass:rgba(9,20,32,.66);
+  --glass-border:rgba(255,255,255,.16);
+  --glass-shadow:0 24px 70px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.16);
+}
+body{
+  background:
+    radial-gradient(circle at 12% 8%,rgba(216,183,106,.14),transparent 30%),
+    radial-gradient(circle at 88% 18%,rgba(124,174,163,.12),transparent 32%),
+    radial-gradient(circle at 52% 100%,rgba(94,111,143,.13),transparent 36%),
+    linear-gradient(180deg,#07111B 0%,#101927 52%,#070B12 100%);
+}
+body::before{content:"";position:fixed;inset:-30%;z-index:-2;background:conic-gradient(from 90deg,transparent,rgba(216,183,106,.07),transparent,rgba(124,174,163,.09),transparent);animation:auroraSpin 42s linear infinite}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.55),transparent 84%)}
+@keyframes auroraSpin{to{transform:rotate(360deg)}}
+.fx-stage{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.fx-orbit{position:absolute;width:360px;height:360px;border:1px solid rgba(255,255,255,.10);border-radius:50%;right:-140px;top:84px;animation:orbit 18s linear infinite}
+.fx-orbit::before,.fx-orbit::after{content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 24px rgba(216,183,106,.36)}
+.fx-orbit::before{left:42px;top:52px}.fx-orbit::after{right:28px;bottom:72px;background:#8CBBAE;box-shadow:0 0 22px rgba(140,187,174,.32)}
+.fx-line{position:absolute;left:8%;right:8%;top:43%;height:1px;background:linear-gradient(90deg,transparent,rgba(216,183,106,.22),rgba(140,187,174,.18),transparent);transform:rotate(-10deg);animation:scanLine 9s ease-in-out infinite}
+@keyframes orbit{to{transform:rotate(360deg)}}@keyframes scanLine{0%,100%{opacity:.18;transform:translateY(-14px) rotate(-10deg)}50%{opacity:.65;transform:translateY(16px) rotate(-10deg)}}
+.splash{position:fixed;inset:0;z-index:500;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 18% 16%,rgba(216,183,106,.16),transparent 30%),radial-gradient(circle at 82% 24%,rgba(140,187,174,.12),transparent 32%),radial-gradient(circle at 50% 96%,rgba(93,108,139,.16),transparent 36%),linear-gradient(180deg,#07111B,#101927 58%,#060A11);transition:opacity .36s ease}
+.splash-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.032) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.026) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(circle at center,#000,transparent 76%)}
+.splash-orbit{position:absolute;width:min(86vw,460px);aspect-ratio:1;border:1px solid rgba(216,183,106,.16);border-radius:50%;animation:orbit 28s linear infinite}
+.splash-orbit span{position:absolute;width:10px;height:10px;border-radius:50%;background:#D8B76A;box-shadow:0 0 0 8px rgba(216,183,106,.10),0 0 28px rgba(216,183,106,.26)}
+.splash-orbit span:nth-child(1){left:14%;top:22%}.splash-orbit span:nth-child(2){right:7%;top:48%;background:#8CBBAE;box-shadow:0 0 0 8px rgba(140,187,174,.10),0 0 26px rgba(140,187,174,.24)}.splash-orbit span:nth-child(3){left:48%;bottom:5%;background:#9DA6C8;box-shadow:0 0 0 8px rgba(157,166,200,.10),0 0 24px rgba(157,166,200,.22)}
+.splash-panel{width:min(86vw,390px);padding:30px 24px 26px;border:1px solid rgba(255,255,255,.14);border-radius:26px;text-align:center;background:rgba(8,20,32,.74);backdrop-filter:blur(24px);box-shadow:0 30px 90px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,255,255,.14);position:relative}
+.brand-mark{width:58px;height:58px;border-radius:18px;margin:0 auto 14px;background:linear-gradient(135deg,#D8B76A,#8CBBAE);display:grid;place-items:center;box-shadow:0 18px 44px rgba(216,183,106,.20)}
+.brand-mark i{width:30px;height:30px;border:2px solid #06111D;border-radius:50%;position:relative;display:block}
+.brand-mark i::before{content:"";position:absolute;left:7px;top:12px;width:15px;height:2px;background:#06111D;transform:rotate(-22deg);box-shadow:8px 6px 0 -1px #06111D}
+.brand-mark i::after{content:"";position:absolute;right:1px;top:3px;width:6px;height:6px;border-radius:50%;background:#06111D}
+.splash-kicker{font-size:10px;letter-spacing:.16em;color:var(--accent);margin-bottom:8px}.splash-panel h1{color:#fff;font-size:30px;letter-spacing:-.03em;margin-bottom:8px}.splash-copy{color:#C7D2D6;font-size:13px;line-height:1.7;margin:0 auto 18px;max-width:280px}
+.splash-status{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:18px}.splash-status span{padding:8px 5px;border:1px solid rgba(216,183,106,.14);border-radius:14px;color:#EDE3CE;font-size:11px;background:rgba(255,255,255,.055)}
+.splash-enter{width:100%;height:46px;border:0;border-radius:17px;background:linear-gradient(135deg,#D8B76A,#8CBBAE);color:#06111D;font-weight:800;font-size:14px;font-family:var(--font-body);cursor:pointer;box-shadow:0 14px 36px rgba(216,183,106,.18);transition:transform .18s}.splash-enter:active{transform:scale(.97)}
+.line-ic{display:inline-block;position:relative;width:18px;height:18px;vertical-align:middle;color:currentColor}
+.ic-install::before{content:"";position:absolute;left:4px;top:2px;width:10px;height:14px;border:1.7px solid currentColor;border-radius:3px}.ic-install::after{content:"";position:absolute;left:7px;top:8px;width:5px;height:5px;border-right:1.7px solid currentColor;border-bottom:1.7px solid currentColor;transform:rotate(45deg)}
+.ic-key::before{content:"";position:absolute;left:2px;top:6px;width:7px;height:7px;border:1.8px solid currentColor;border-radius:50%}.ic-key::after{content:"";position:absolute;left:10px;top:9px;width:7px;height:2px;background:currentColor;box-shadow:4px 3px 0 -1px currentColor}
+.ic-user::before{content:"";position:absolute;left:6px;top:2px;width:6px;height:6px;border:1.8px solid currentColor;border-radius:50%}.ic-user::after{content:"";position:absolute;left:3px;bottom:2px;width:12px;height:7px;border:1.8px solid currentColor;border-radius:10px 10px 3px 3px}
+.ic-gear::before{content:"";position:absolute;left:4px;top:4px;width:10px;height:10px;border:2px solid currentColor;border-radius:50%;box-shadow:0 -4px 0 -2px currentColor,0 4px 0 -2px currentColor,4px 0 0 -2px currentColor,-4px 0 0 -2px currentColor}.ic-gear::after{content:"";position:absolute;left:8px;top:8px;width:2px;height:2px;background:currentColor;border-radius:50%}
+.ic-chat::before{content:"";position:absolute;left:2px;top:4px;width:14px;height:10px;border:1.8px solid currentColor;border-radius:5px}.ic-chat::after{content:"";position:absolute;left:6px;bottom:1px;border:4px solid transparent;border-top-color:currentColor;border-right:0}
+.ic-preview::before{content:"";position:absolute;left:1px;top:5px;width:16px;height:9px;border:1.8px solid currentColor;border-radius:50%}.ic-preview::after{content:"";position:absolute;left:7px;top:8px;width:4px;height:4px;background:currentColor;border-radius:50%}
+.ic-history::before{content:"";position:absolute;left:4px;top:2px;width:11px;height:14px;border:1.8px solid currentColor;border-radius:3px}.ic-history::after{content:"";position:absolute;left:7px;top:6px;width:6px;height:1.8px;background:currentColor;box-shadow:0 4px 0 currentColor}
+.ic-guide::before{content:"";position:absolute;left:3px;top:3px;width:12px;height:13px;border:1.8px solid currentColor;border-radius:2px}.ic-guide::after{content:"";position:absolute;left:7px;top:6px;width:5px;height:1.8px;background:currentColor;box-shadow:0 4px 0 currentColor}
+.ic-send::before{content:"";position:absolute;left:3px;top:3px;border-left:13px solid currentColor;border-top:7px solid transparent;border-bottom:7px solid transparent}.ic-send::after{content:"";position:absolute;left:6px;top:8px;width:8px;height:1.6px;background:#06111D;transform:rotate(-18deg)}
+.tb,.bnav{background:rgba(7,19,31,.62);border-color:var(--glass-border);box-shadow:var(--glass-shadow)}
+.bnav{align-items:stretch;gap:4px;min-height:66px;padding:6px 8px calc(6px + var(--sb))}
+.bnav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;height:54px;padding:6px 4px;line-height:1;letter-spacing:0;text-transform:none;border-radius:16px;-webkit-tap-highlight-color:transparent}
+.bnav button:focus{outline:none}.bnav button:focus-visible{outline:1px solid rgba(216,183,106,.42);outline-offset:-3px}
+.bnav button.on{background:rgba(216,183,106,.08);box-shadow:inset 0 0 0 1px rgba(216,183,106,.18)}
+.bnav button .ni.line-ic{display:block;width:20px;height:20px;margin:0;flex:0 0 20px;opacity:.62;filter:none;transform-origin:center}
+.bnav button.on .ni.line-ic{opacity:1;transform:translateY(-1px)}
+.bnav .nav-label{display:block;font-size:10px;line-height:1;white-space:nowrap}
+.tb{position:relative;z-index:3;margin:10px 12px 0;border:1px solid var(--glass-border);border-radius:22px}
+.tb-l .ic{border-radius:14px!important;background:linear-gradient(135deg,#D8B76A,#8CBBAE)!important;box-shadow:0 0 26px rgba(216,183,106,.22);color:#06111D}
+.tb-l span{color:#fff}.tb-install,.tb-btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#DFF7FF}.tb-install{color:var(--accent)}
+.tb-btn:active,.tb-install:active{background:rgba(216,183,106,.14);color:#fff}
+.view{position:relative;z-index:2}
+.chat-hist{padding:14px 14px 8px;gap:10px}
+.home-hero{position:relative;min-height:230px;border:1px solid rgba(255,255,255,.14);border-radius:30px;padding:20px;overflow:hidden;background:linear-gradient(160deg,rgba(255,255,255,.16),rgba(255,255,255,.05));box-shadow:var(--glass-shadow);isolation:isolate}
+.home-hero::before{content:"";position:absolute;inset:-2px;background:linear-gradient(120deg,rgba(216,183,106,.18),transparent 34%,rgba(140,187,174,.16),transparent 72%);z-index:-1;animation:heroWash 10s ease-in-out infinite alternate}
+.home-hero::after{content:"";position:absolute;width:210px;height:210px;border-radius:44px;background:linear-gradient(135deg,rgba(216,183,106,.16),rgba(140,187,174,.10));right:-64px;bottom:-70px;filter:blur(1px);transform:rotate(18deg);animation:softFloat 9s ease-in-out infinite}
+@keyframes heroWash{to{transform:translate3d(-18px,12px,0) scale(1.06)}}@keyframes softFloat{50%{transform:translateY(-18px) rotate(26deg)}}
+.hero-kicker{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid rgba(216,183,106,.22);border-radius:999px;color:var(--accent);font-size:11px;background:rgba(216,183,106,.08);backdrop-filter:blur(18px)}
+.home-hero h1{font-size:32px;line-height:1.03;letter-spacing:-.04em;margin:16px 0 10px;color:#fff}
+.home-hero p{max-width:310px;color:#BFD1DF;font-size:13px;line-height:1.75}
+.hero-actions{display:flex;gap:9px;margin:16px 0 0;flex-wrap:wrap}
+.hero-actions button{border:1px solid rgba(255,255,255,.14);border-radius:15px;padding:10px 13px;font-size:12px;font-weight:700;font-family:var(--font-body);cursor:pointer;color:#07131F;background:linear-gradient(135deg,#D8B76A,#8CBBAE);box-shadow:0 10px 28px rgba(216,183,106,.18);transition:transform .18s}
+.hero-actions button.secondary{color:#EAF7FF;background:rgba(255,255,255,.08);box-shadow:none}
+.hero-actions button:active{transform:scale(.96)}
+.hero-device{position:absolute;right:18px;top:72px;width:112px;height:150px;border:1px solid rgba(255,255,255,.16);border-radius:24px;background:rgba(6,17,29,.72);box-shadow:0 28px 80px rgba(0,0,0,.34);padding:9px;transform:rotate(5deg);animation:deviceFloat 6s ease-in-out infinite}
+@keyframes deviceFloat{50%{transform:translateY(-12px) rotate(2deg)}}
+.device-map{height:100%;border-radius:19px;background:linear-gradient(145deg,rgba(216,183,106,.18),rgba(140,187,174,.10)),repeating-linear-gradient(60deg,rgba(255,255,255,.10) 0 1px,transparent 1px 20px);position:relative;overflow:hidden}
+.device-map span{position:absolute;width:11px;height:11px;border-radius:50%;background:#D8B76A;box-shadow:0 0 0 6px rgba(216,183,106,.14)}
+.device-map .p1{left:25px;top:42px}.device-map .p2{right:26px;top:82px;background:#8CBBAE}.device-map .p3{left:48px;bottom:34px;background:#9DA6C8}
+.route-svg{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke:rgba(255,255,255,.62);stroke-width:2;stroke-dasharray:5 7;animation:dash 5s linear infinite}@keyframes dash{to{stroke-dashoffset:-120}}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;max-width:340px}
+.hero-stats div{border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:10px;background:rgba(255,255,255,.06)}
+.hero-stats strong{display:block;color:#fff;font-size:15px}.hero-stats span{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+.msg{border:1px solid rgba(255,255,255,.10);backdrop-filter:blur(22px)}.msg.a{color:#EAF7FF;background:rgba(255,255,255,.09)}.msg.u{color:#06111D}.msg.s{border:none}
+.chat-inp{margin:0 12px 10px;border:1px solid rgba(255,255,255,.12);border-radius:24px;background:rgba(7,19,31,.72);box-shadow:var(--glass-shadow)}
+.chat-row textarea{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#fff;overflow:hidden;max-height:150px}.chat-row textarea::placeholder{color:#7892A8}.sbtn{background:linear-gradient(135deg,#D8B76A,#8CBBAE);color:#06111D;box-shadow:0 10px 28px rgba(216,183,106,.20)}
+.chips{gap:8px}.chip{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#CFE3F2}.chip:active{background:rgba(216,183,106,.18);color:#fff}
+.composer-brief{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}.brief-chip{border:1px solid rgba(255,255,255,.12);border-radius:15px;padding:8px;background:rgba(255,255,255,.06);color:#CFE3F2;font-size:11px;text-align:left;cursor:pointer;font-family:var(--font-body)}.brief-chip.on{color:#06111D;background:linear-gradient(135deg,#D8B76A,#8CBBAE)}
+.dialog-tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:10px}
+.tool-chip{border:1px solid rgba(216,183,106,.18);border-radius:14px;padding:8px 6px;background:rgba(255,255,255,.055);color:#EDE3CE;font-size:11px;font-weight:700;font-family:var(--font-body);cursor:pointer;transition:transform .16s,background .16s}
+.tool-chip:active{transform:scale(.96);background:rgba(216,183,106,.14)}
+.prompt-meter{display:flex;align-items:center;gap:9px;margin:0 2px 10px;color:#9FAEB6;font-size:10px}
+.prompt-meter span{min-width:70px}.meter-bar{height:5px;flex:1;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}.meter-fill{display:block;height:100%;width:0;background:linear-gradient(90deg,#8CBBAE,#D8B76A);border-radius:999px;transition:width .22s}
+body.focus-chat .home-hero,body.focus-chat .msg.welcome{display:none}
+body.focus-chat .chat-hist{padding-top:10px}
+.pempty{background:transparent;color:var(--muted)}.preview-stage{width:min(86vw,360px);aspect-ratio:1.05;border:1px solid rgba(255,255,255,.14);border-radius:34px;background:linear-gradient(145deg,rgba(255,255,255,.14),rgba(255,255,255,.05));box-shadow:var(--glass-shadow);position:relative;overflow:hidden;margin-bottom:22px}
+.preview-stage::before{content:"";position:absolute;inset:28px;border:1px dashed rgba(216,183,106,.26);border-radius:26px;animation:softFloat 8s ease-in-out infinite}
+.preview-card-mini{position:absolute;left:26px;top:30px;width:150px;padding:14px;border-radius:20px;background:rgba(7,19,31,.76);border:1px solid rgba(255,255,255,.12);text-align:left;color:#fff}.preview-card-mini b{font-size:13px}.preview-card-mini span{display:block;font-size:10px;color:var(--muted);margin-top:5px}
+.preview-dot{position:absolute;width:13px;height:13px;border-radius:50%;background:#D8B76A;box-shadow:0 0 0 8px rgba(216,183,106,.12);animation:pinPop 2.8s ease-in-out infinite}.preview-dot.d1{right:66px;top:84px}.preview-dot.d2{right:100px;bottom:72px;background:#8CBBAE;animation-delay:.45s}.preview-dot.d3{left:86px;bottom:48px;background:#9DA6C8;animation-delay:.9s}@keyframes pinPop{50%{transform:scale(1.2)}}
+.ptop{background:rgba(7,19,31,.72);border-color:rgba(255,255,255,.12)}.ptop button{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#EAF7FF}.ptop button.accent{background:linear-gradient(135deg,#D8B76A,#8CBBAE);color:#06111D;border:none}.ptop .url{color:#9CB2C5}
+.plans-head{padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.10);display:flex;justify-content:space-between;align-items:center;background:rgba(7,19,31,.62);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.plans-head h3{font-size:16px;color:#F8F4EC;font-weight:800;letter-spacing:0;margin:0}
+.plans-actions{display:flex;gap:7px;align-items:center}.plans-actions button{font-size:12px;padding:7px 11px;border:1px solid rgba(216,183,106,.35);border-radius:12px;background:rgba(255,255,255,.06);cursor:pointer;color:var(--accent);font-family:var(--font-body);font-weight:700}.plans-actions button.danger{border-color:rgba(232,74,95,.42);color:#FF9AA8;background:rgba(232,74,95,.08)}
+#vPlans,#pList{background:transparent}#pList>p{color:#8E9CA4!important}
+.about{background:transparent}.about .hero{background:linear-gradient(135deg,rgba(216,183,106,.18),rgba(140,187,174,.10));border:1px solid rgba(255,255,255,.12);box-shadow:var(--glass-shadow)}.about .tips,.about .step,.pcard{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#EAF7FF}.about .tips li,.about .tips h4,.pcard .pt{color:#EAF7FF}.pcard .pm{color:var(--muted)}
+.install-box,.auth-box,.acct-box,.sm{background:rgba(9,20,32,.92);border:1px solid rgba(255,255,255,.14);box-shadow:var(--glass-shadow);color:#fff}.auth-box .field input,.auth-box .field select,.sf input,.acct-box .card input,#actionInput{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.13)!important;color:#fff!important}.auth-box .logo h2,.sm h3,.acct-box .head .info h3,.install-box h3{color:#fff}
+@media(max-width:430px){.tb{gap:8px;padding:10px 12px}.tb-l{gap:8px}.tb-l span{font-size:15px;white-space:nowrap}.tb-install{display:none}.home-hero{min-height:204px;padding:16px}.home-hero h1{font-size:25px;max-width:270px;position:relative;z-index:2}.home-hero p{max-width:235px;position:relative;z-index:2;font-size:12px}.hero-actions{position:relative;z-index:2;margin-top:12px}.hero-device{width:86px;height:122px;right:-10px;top:92px;opacity:.58}.composer-brief{grid-template-columns:1fr 1fr 1fr}.dialog-tools{grid-template-columns:repeat(4,1fr)}.chat-inp{margin-bottom:8px}.chat-row textarea{max-height:132px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+</style>
+</head>
+<body>
+<div class="fx-stage" aria-hidden="true"><div class="fx-orbit"></div><div class="fx-line"></div></div>
+<div id="sp" class="splash">
+  <div class="splash-grid"></div>
+  <div class="splash-orbit"><span></span><span></span><span></span></div>
+  <section class="splash-panel">
+    <div class="brand-mark"><i></i></div>
+    <p class="splash-kicker">TRIP OS · MOBILE FIRST</p>
+    <h1>冰冰出行</h1>
+    <p class="splash-copy">从一句旅行想法，到路线、地图、酒店、餐厅和待办的完整行程板。</p>
+    <div class="splash-status">
+      <span>路线编排</span><span>地图预览</span><span>后端代理</span>
+    </div>
+    <button class="splash-enter" onclick="document.getElementById('sp').style.pointerEvents='none';document.getElementById('sp').style.opacity='0';setTimeout(function(){document.getElementById('sp').remove()},360)">进入工作台</button>
+  </section>
+</div>
+<div class="tb"><div class="tb-l"><div class="ic brand-mark" style="background:linear-gradient(135deg,#D8B76A,#8CBBAE)"><i></i></div><span>冰冰出行</span></div><div class="tb-sp"></div>
+<button class="tb-install" id="btnInstall" onclick="install()"><span class="line-ic ic-install"></span> 安装App</button>
+<button class="tb-btn" id="tbSettingsBtn"><span class="line-ic ic-key"></span></button>
+<span class="tb-badge" id="planBadge" style="display:none;font-size:10px"></span>
+<button class="tb-btn" id="tbAcctBtn"><span class="line-ic ic-user"></span></button></div>
+
+<div class="view on" id="vChat">
+<div class="chat-hist" id="hist">
+<section class="home-hero">
+  <div class="hero-kicker">LIVE ITINERARY STUDIO</div>
+  <h1>把一句想法变成会动的旅行计划</h1>
+  <p>路线、酒店、餐厅、地图与待办会被整理成一张可执行的移动旅行工作台。</p>
+  <div class="hero-actions"><button onclick="focusPrompt()">开始规划</button></div>
+  <div class="hero-device"><div class="device-map"><svg class="route-svg" viewBox="0 0 100 150"><path d="M22 35 C68 20 78 58 58 76 S30 105 54 128"/></svg><span class="p1"></span><span class="p2"></span><span class="p3"></span></div></div>
+</section>
+<div class="msg a welcome">输入旅行需求，开始规划你的专属行程<br><span style="font-size:12px;opacity:.6">DeepSeek 驱动 · 后端代理生成 · 实时进度</span></div></div>
+<div class="chat-inp"><div class="composer-brief"><button type="button" class="brief-chip on" onclick="toggleBrief(this)">轻松不赶</button><button type="button" class="brief-chip" onclick="toggleBrief(this)">美食优先</button><button type="button" class="brief-chip" onclick="toggleBrief(this)">亲子友好</button></div>
+<div class="dialog-tools"><button type="button" class="tool-chip" onclick="sparkIdea()">灵感</button><button type="button" class="tool-chip" onclick="completePrompt()">补全</button><button type="button" class="tool-chip" id="focusTool" onclick="toggleFocusMode()">专注</button><button type="button" class="tool-chip" onclick="clearPrompt()">清空</button></div>
+<div class="prompt-meter"><span id="promptScore">完整度 0%</span><i class="meter-bar"><b class="meter-fill" id="promptFill"></b></i></div>
+<div class="chat-row"><textarea id="inp" placeholder="例如：从常州出发，4天3晚，想轻松一点，偏自然风景和好吃的小店…" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();go()}"></textarea><button class="sbtn" onclick="go()" id="sbtn"><span class="line-ic ic-send"></span></button></div></div></div>
+
+<div class="view" id="vPreview">
+<div class="ptop"><button onclick="sv('chat')">← 返回</button><span class="url" id="pUrl">未生成</span><button onclick="copyUrl()">📋</button><button onclick="openNew()">🔗</button><button class="accent" onclick="revise()">🔧 修改</button></div>
+<div class="pempty" id="pEmpty"><div class="preview-stage"><div class="preview-card-mini"><b>AI Trip Board</b><span>Day 1 · 抵达与夜游</span><span>Day 2 · 核心路线</span><span>Day 3 · 返程整理</span></div><span class="preview-dot d1"></span><span class="preview-dot d2"></span><span class="preview-dot d3"></span></div><h3>行程预览会在这里展开</h3><p>生成后可查看地图、每日路线、航班酒店、餐厅与待办清单</p></div>
+<iframe class="pframe" id="pFrame" style="display:none" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe></div>
+
+<div class="view" id="vAbout">
+<div class="about">
+  <div class="hero"><div class="icon">📖</div><h2>使用指南</h2><p>冰冰出行 · 功能介绍与操作说明</p></div>
+  <div class="tips" style="margin-bottom:14px"><h4>🔘 底部导航栏</h4><li><b>💬 对话</b> — 输入需求，AI生成行程</li><li><b>👁 预览</b> — 查看完整行程（地图+日程+航班+酒店）</li><li><b>📋 历史</b> — 查看、删除已生成行程</li><li><b>📖 说明</b> — 当前页面，功能帮助</li></div>
+  <div class="tips" style="margin-bottom:14px"><h4>对话页操作</h4><li><b>输入框</b> — 输入旅行需求，点击发送按钮</li><li><b>输入工具</b> — 可随机获取灵感、补全需求、进入专注模式或清空输入</li><li><b>进度条</b> — AI生成时实时显示百分比</li><li><b>完成后</b> — 可使用「预览/新窗口/修改」按钮</li></div>
+  <div class="tips" style="margin-bottom:14px"><h4>顶栏功能</h4><li><b>安装App</b> — PWA安装到桌面</li><li><b>账户入口</b> — 未登录时打开登录，登录后查看账户</li><li><b>头像按钮</b> — 登录后显示用户名首字母</li></div>
+  <div class="tips"><h4>💡 技巧</h4><li>说清楚出发地，AI从出发地开始编排</li><li>可加"经济型"或"豪华游"需求</li><li>行程生成后随时点🔧修改</li><li>地图弹窗点「高德」跳转导航</li></div>
+</div></div>
+<div class="view" id="vPlans"><div class="plans-head"><h3>历史行程</h3><div class="plans-actions"><button class="danger" onclick="showAction('🗑️','删除全部','确定要删除所有历史行程吗？此操作不可撤销。',null,()=>delAll())">删除全部</button><button onclick="newChat()">新对话</button></div></div><div style="flex:1;overflow-y:auto" id="pList"><p style="text-align:center;color:#94A3B8;padding:40px;font-size:13px">暂无历史行程</p></div></div>
+
+<div class="bnav"><button class="on" onclick="sv('chat')"><span class="ni line-ic ic-chat"></span><span class="nav-label">对话</span></button><button onclick="sv('preview')"><span class="ni line-ic ic-preview"></span><span class="nav-label">预览</span></button><button onclick="sv('plans')"><span class="ni line-ic ic-history"></span><span class="nav-label">历史</span></button><button onclick="sv('about')"><span class="ni line-ic ic-guide"></span><span class="nav-label">指引</span></button></div>
+
+<!-- Install Modal -->
+<div class="install-modal" id="installModal"><div class="install-box"><div class="icon"><span class="line-ic ic-install"></span></div><h3>安装冰冰出行</h3><p>将本应用添加到主屏幕，随时随地快速访问</p><div class="steps"><li>打开浏览器菜单（⋮ 或 ···）</li><li>选择「安装应用」或「添加到主屏幕」</li><li>按提示完成安装，桌面出现冰冰出行图标</li></div><div class="actions"><button class="secondary" onclick="closeInstall()">取消</button><button class="primary" onclick="doInstall()">开始安装</button></div></div></div>
+
+<!-- Reusable Action Modal -->
+<div class="install-modal" id="actionModal"><div class="install-box" id="actionBox">
+  <div class="icon" id="actionIcon">⚠️</div><h3 id="actionTitle">确认操作</h3><p id="actionMsg">确定要执行此操作吗？</p>
+  <input type="text" id="actionInput" style="display:none;width:100%;padding:12px 16px;border:1.5px solid var(--border2);border-radius:12px;font-size:14px;font-family:var(--font-body);background:var(--bg);color:var(--ink);margin-bottom:20px" placeholder="请输入...">
+  <div class="actions"><button class="secondary" id="actionCancel">取消</button><button class="primary" id="actionConfirm">确认</button></div>
+</div></div>
+
+<!-- Auth Overlay -->
+<div class="auth-overlay" id="authOverlay"><div class="auth-box" id="authBox"><div class="logo"><div class="ic">🧊</div><h2>冰冰出行</h2><p id="authSubtitle">登录以同步账户数据</p></div>
+<div id="authLogin"><div class="field"><label>用户名</label><input type="text" id="loginUser" placeholder="输入用户名" autocomplete="username" style="border:2px solid var(--border2);background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.04)"></div><div class="field"><label>密码</label><input type="password" id="loginPass" placeholder="输入密码" autocomplete="current-password" style="border:2px solid var(--border2);background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.04)"><div class="err" id="loginErr"></div></div><div class="field"><label>DeepSeek API Key</label><input type="password" id="loginKey" placeholder="sk-..." oninput="validateKey()" style="border:2px solid var(--border2);background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.04)"><span style="font-size:10px;color:var(--muted);margin-top:3px;display:block" id="keyStatus">输入Key后自动检测</span></div><div class="field"><label>模型</label><select id="loginModel" style="width:100%;padding:14px 16px;border:2px solid var(--border2);border-radius:14px;font-size:14px;font-family:var(--font-body);background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.04)"><option value="deepseek-v4-pro">deepseek-v4-pro (旗舰版)</option><option value="deepseek-v4-flash">deepseek-v4-flash (极速版)</option></select></div><div class="actions"><button class="secondary" onclick="closeAuth()">关闭</button><button class="primary" onclick="doLogin()">登录</button></div><div class="switch">还没有账号？<a onclick="showRegister()">立即注册</a> · <a onclick="showForgot()">忘记密码？</a></div></div>
+<div id="authForgot" style="display:none"><div class="field"><label>用户名</label><input type="text" id="forgotUser" placeholder="输入用户名"></div><div class="field"><label>绑定的QQ邮箱</label><input type="text" id="forgotQQ" placeholder="123456@qq.com"><div class="err" id="forgotErr"></div></div><div class="actions"><button class="secondary" onclick="switchAuth()">← 返回登录</button><button class="primary" onclick="requestCode()">📧 获取验证码</button></div></div>
+<div id="authReset" style="display:none"><div class="field"><label>验证码</label><input type="text" id="resetCode" placeholder="6位数字验证码" maxlength="6"></div><div class="field"><label>新密码</label><input type="password" id="resetPass" placeholder="至少8字符"><div class="err" id="resetErr"></div></div><div class="actions"><button class="secondary" onclick="showForgot()">← 返回上一步</button><button class="primary" onclick="doReset()">重置密码</button></div></div>
+<div id="authRegister" style="display:none"><div class="field"><label>用户名</label><input type="text" id="regUser" placeholder="3-30字符" autocomplete="username" style="border:2px solid var(--border2);background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.04)"></div><div class="field"><label>密码</label><input type="password" id="regPass" placeholder="至少8字符" autocomplete="new-password" style="border:2px solid var(--border2);background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.04)"><div class="field"><label>确认密码</label><input type="password" id="regPass2" placeholder="再次输入密码" style="border:2px solid var(--border2);background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.04)"><div class="err" id="regErr"></div></div></div><div class="actions"><button class="secondary" onclick="switchAuth()">← 返回登录</button><button class="primary" onclick="doRegister()">注册</button></div></div></div></div>
+
+<!-- Account Panel -->
+<div class="acct-panel" id="acctPanel"><div class="acct-box">
+<div class="head"><div class="avatar" id="acctAvatar"><span class="line-ic ic-user"></span></div><div class="info"><h3 id="acctName">未登录</h3><p id="acctStatus">点击按钮登录或注册</p></div><button onclick="hideAcctPanel()" style="margin-left:auto;width:32px;height:32px;border:1.5px solid var(--border2);border-radius:50%;background:transparent;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--muted)">✕</button></div>
+<div class="card"><h4>账户信息</h4><div class="row"><span>用户名</span><span class="val" id="acctUsername">-</span></div><div class="row"><span>注册时间</span><span class="val" id="acctCreated">-</span></div><div class="row"><span>API Key</span><button class="btn" onclick="hideAcctPanel();setTimeout(showLogin,300)">⚙ 配置</button></div></div>
+<div class="card"><h4>QQ 邮箱绑定</h4><div class="row"><span>当前邮箱</span><span class="val" id="acctQQ">未绑定</span></div><input type="text" id="qqInput" placeholder="输入QQ邮箱 (如 123456@qq.com)"><div class="actions" style="margin-top:8px"><button class="secondary" onclick="bindQQ()" style="font-size:12px;padding:8px 14px;border-radius:12px;border:1px solid var(--border2);background:transparent;cursor:pointer;font-family:var(--font-body)">💾 绑定</button></div></div>
+<div class="card"><h4>修改密码</h4><input type="password" id="oldPass" placeholder="原密码" style="margin-bottom:6px"><input type="password" id="newPass" placeholder="新密码 (至少8字符)"><div class="actions" style="margin-top:8px"><button class="secondary" onclick="changePwd()" style="font-size:12px;padding:8px 14px;border-radius:12px;border:1px solid var(--border2);background:transparent;cursor:pointer;font-family:var(--font-body)">修改</button></div></div>
+<button class="logout" onclick="doLogout()">退出登录</button></div></div>
+
+<div class="so" id="so"><div class="sm"><h3>⚙ API 设置</h3><p class="desc">配置DeepSeek API Key，仅存本机</p>
+<div class="sf"><label>API Key <span style="color:var(--red)">*</span></label><input type="password" id="cfgKey" placeholder="sk-..."><p class="hint">仅存本机</p></div>
+<div class="sf"><label>模型</label><input type="text" id="cfgModel" value="deepseek-v4-pro"></div>
+<div class="sa"><button class="bcancel" onclick="hideSet()">取消</button><button class="btest" onclick="testApi()">🧪 测试</button><button class="bsave" onclick="saveSet()">💾 保存</button></div></div></div>
+
+<script>
+let busy=false,curHTML='',curPrompt='';
+const API='https://api.deepseek.com/v1';
+function gk(){return localStorage.getItem('bb_key')||''}
+function gm(){return localStorage.getItem('bb_model')||'deepseek-v4-pro'}
+function sv(n){document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));document.getElementById('v'+n.charAt(0).toUpperCase()+n.slice(1)).classList.add('on');document.querySelectorAll('.bnav button').forEach((b,i)=>{b.classList.toggle('on',['chat','preview','plans','about'][i]===n)})}
+function newChat(){document.getElementById('pFrame').style.display='none';document.getElementById('pEmpty').style.display='flex';document.getElementById('pUrl').textContent='未生成';curHTML='';curPrompt='';sv('chat');document.getElementById('inp').focus();toast('已返回新对话')}
+function install(){document.getElementById('installModal').classList.add('on')}
+function closeInstall(){document.getElementById('installModal').classList.remove('on')}
+function doInstall(){closeInstall();if(window._dp){window._dp.prompt();window._dp.userChoice.then(r=>{if(r.outcome==='accepted')toast('安装成功！');window._dp=null});return}const ua=navigator.userAgent;if(/iPhone|iPad/.test(ua)){toast('Safari菜单→分享→添加到主屏幕')}else if(/Android/.test(ua)){toast('Chrome菜单→安装应用')}else{toast('Chrome/Edge地址栏→安装')}}
+
+// Reusable action modal
+function showAction(icon,title,msg,placeholder,onConfirm){
+  document.getElementById('actionIcon').textContent=icon||'⚠️';
+  document.getElementById('actionTitle').textContent=title||'确认操作';
+  document.getElementById('actionMsg').textContent=msg||'';
+  const inp=document.getElementById('actionInput');
+  if(placeholder){inp.style.display='block';inp.value='';inp.placeholder=placeholder}else{inp.style.display='none'}
+  document.getElementById('actionModal').classList.add('on');
+  const cancel=document.getElementById('actionCancel'),conf=document.getElementById('actionConfirm');
+  const close=()=>{document.getElementById('actionModal').classList.remove('on');cancel.onclick=null;conf.onclick=null};
+  cancel.onclick=close;
+  conf.onclick=()=>{onConfirm(inp.style.display!=='none'?inp.value.trim():true);close()}
+}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();window._dp=e})
+
+// ── Auth System ─────────────────────────────────────
+const API_BASE = (()=>{const s=localStorage.getItem('bb_server');if(s)return s;const h=window.location.hostname;return h==='127.0.0.1'||h==='localhost'?'http://127.0.0.1:3001':'https://bingbing-travel-production.up.railway.app'})();
+let authToken = localStorage.getItem('bb_token') || '';
+let authUser = localStorage.getItem('bb_user') || '';
+async function postJSON(url,payload,token){
+  let r,d;
+  try{
+    r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(payload)});
+  }catch(e){
+    throw new Error('网络连接失败：请确认后端服务已部署并允许当前 Netlify 域名访问');
+  }
+  try{d=await r.json()}catch{d={error:'服务器返回了无法解析的内容'}}
+  if(!r.ok)throw new Error(d.error||('请求失败 HTTP '+r.status));
+  return d;
+}
+
+function showLogin(){document.getElementById('authOverlay').classList.add('on');document.getElementById('authLogin').style.display='block';document.getElementById('authRegister').style.display='none';document.getElementById('authForgot').style.display='none';document.getElementById('authReset').style.display='none';document.getElementById('authSubtitle').textContent='登录';document.getElementById('loginKey').value=gk();document.getElementById('loginModel').value=gm();document.getElementById('keyStatus').textContent='输入Key后自动检测';document.getElementById('keyStatus').style.color='var(--muted)'}
+function closeAuth(){document.getElementById('authOverlay').classList.remove('on')}
+function showRegister(){document.getElementById('authLogin').style.display='none';document.getElementById('authRegister').style.display='block';document.getElementById('authForgot').style.display='none';document.getElementById('authReset').style.display='none';document.getElementById('authSubtitle').textContent='注册新账号';document.getElementById('regErr').style.display='none'}
+function switchAuth(){document.getElementById('authLogin').style.display='block';document.getElementById('authRegister').style.display='none';document.getElementById('authForgot').style.display='none';document.getElementById('authReset').style.display='none';document.getElementById('authSubtitle').textContent='登录';document.getElementById('regErr').style.display='none';document.getElementById('loginErr').style.display='none'}
+function showForgot(){document.getElementById('authLogin').style.display='none';document.getElementById('authRegister').style.display='none';document.getElementById('authForgot').style.display='block';document.getElementById('authReset').style.display='none';document.getElementById('authSubtitle').textContent='找回密码';document.getElementById('forgotErr').style.display='none';document.getElementById('forgotUser').value='';document.getElementById('forgotQQ').value=''}
+function setErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block'}
+async function doRegister(){const u=document.getElementById('regUser').value.trim(),p=document.getElementById('regPass').value,p2=document.getElementById('regPass2').value;document.getElementById('regErr').style.display='none';if(u.length<3||u.length>30)return setErr('regErr','用户名需3-30字符');if(p.length<8)return setErr('regErr','密码至少8字符');if(p!==p2)return setErr('regErr','两次密码不一致');try{const r=await fetch(API_BASE+'/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});const d=await r.json();if(!r.ok)return setErr('regErr',d.error||'注册失败');authToken=d.token;authUser=d.username;localStorage.setItem('bb_token',authToken);localStorage.setItem('bb_user',authUser);toast('注册成功！欢迎 '+authUser);document.getElementById('regUser').value='';document.getElementById('regPass').value='';document.getElementById('regPass2').value='';switchAuth()}catch(e){setErr('regErr','连接服务器失败')}}
+async function doLogin(){const u=document.getElementById('loginUser').value.trim(),p=document.getElementById('loginPass').value,k=document.getElementById('loginKey').value.trim(),m=document.getElementById('loginModel').value;document.getElementById('loginErr').style.display='none';if(!u||!p)return setErr('loginErr','请填写用户名和密码');if(k){localStorage.setItem('bb_key',k)}if(m){localStorage.setItem('bb_model',m)}try{const r=await fetch(API_BASE+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});const d=await r.json();if(!r.ok)return setErr('loginErr',d.error||'登录失败');authToken=d.token;authUser=d.username;localStorage.setItem('bb_token',authToken);localStorage.setItem('bb_user',authUser);closeAuth();updateAcctUI();toast('登录成功！');document.getElementById('loginUser').value='';document.getElementById('loginPass').value=''}catch(e){setErr('loginErr','连接服务器失败')}}
+function doLogout(){authToken='';authUser='';localStorage.removeItem('bb_token');localStorage.removeItem('bb_user');updateAcctUI();document.getElementById('acctPanel').classList.remove('on');toast('已退出');setTimeout(showLogin,600)}
+async function updateAcctUI(){const nameEl=document.getElementById('acctName'),statEl=document.getElementById('acctStatus'),avatarEl=document.getElementById('acctAvatar'),usrEl=document.getElementById('acctUsername'),createdEl=document.getElementById('acctCreated'),qqEl=document.getElementById('acctQQ');updateTopbar();if(!authToken){nameEl.textContent='未登录';statEl.textContent='点击设置按钮登录或注册';avatarEl.innerHTML='<span class="line-ic ic-user"></span>';usrEl.textContent='-';createdEl.textContent='-';qqEl.textContent='未绑定';return}nameEl.textContent=authUser;statEl.textContent='已登录';avatarEl.textContent=authUser.charAt(0).toUpperCase();try{const r=await fetch(API_BASE+'/api/user/profile',{headers:{Authorization:'Bearer '+authToken}});if(!r.ok)throw new Error();const d=await r.json();usrEl.textContent=d.username;createdEl.textContent=d.created_at?d.created_at.slice(0,10):'-';qqEl.textContent=d.qq_email||'未绑定';if(d.qq_email)document.getElementById('qqInput').value=d.qq_email}catch{usrEl.textContent=authUser}};updateTopbar();
+async function bindQQ(){if(!authToken)return toast('请先登录','e');const qq=document.getElementById('qqInput').value.trim();if(!/^\d{5,12}@qq\.com$/.test(qq))return toast('请输入正确QQ邮箱格式','e');try{const r=await fetch(API_BASE+'/api/user/bind-qq',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+authToken},body:JSON.stringify({qqEmail:qq})});if(r.ok){toast('QQ邮箱绑定成功');updateAcctUI()}else{const d=await r.json();toast(d.error||'绑定失败','e')}}catch{toast('连接服务器失败','e')}}
+async function changePwd(){if(!authToken)return toast('请先登录','e');const old=document.getElementById('oldPass').value,nu=document.getElementById('newPass').value;if(!old)return toast('请输入原密码','e');if(nu.length<8)return toast('新密码至少8字符','e');try{const r=await fetch(API_BASE+'/api/auth/change-password',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+authToken},body:JSON.stringify({oldPassword:old,newPassword:nu})});if(r.ok){toast('密码已修改');document.getElementById('oldPass').value='';document.getElementById('newPass').value=''}else{const d=await r.json();toast(d.error||'修改失败','e')}}catch{toast('连接服务器失败','e')}}
+
+function showAcctPanel(){document.getElementById('acctPanel').classList.add('on');updateAcctUI()}
+function hideAcctPanel(){document.getElementById('acctPanel').classList.remove('on')}
+
+let resetUsername='';
+async function requestCode(){const u=document.getElementById('forgotUser').value.trim(),q=document.getElementById('forgotQQ').value.trim();document.getElementById('forgotErr').style.display='none';if(!u||!q)return setErr('forgotErr','请填写用户名和QQ邮箱');if(!/^\d{5,12}@qq\.com$/.test(q))return setErr('forgotErr','QQ邮箱格式不正确');try{const r=await fetch(API_BASE+'/api/auth/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,qqEmail:q})});const d=await r.json();if(!r.ok)return setErr('forgotErr',d.error||'请求失败');resetUsername=u;if(d.devCode){toast('验证码: '+d.devCode)}document.getElementById('authForgot').style.display='none';document.getElementById('authReset').style.display='block';document.getElementById('authSubtitle').textContent='输入验证码';document.getElementById('resetErr').style.display='none'}catch(e){setErr('forgotErr','连接服务器失败')}}
+async function doReset(){const code=document.getElementById('resetCode').value.trim(),np=document.getElementById('resetPass').value;document.getElementById('resetErr').style.display='none';if(code.length!==6)return setErr('resetErr','请输入6位验证码');if(np.length<8)return setErr('resetErr','新密码至少8字符');try{const r=await fetch(API_BASE+'/api/auth/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:resetUsername,code:code,newPassword:np})});const d=await r.json();if(!r.ok)return setErr('resetErr',d.error||'重置失败');toast('密码已重置，请重新登录');document.getElementById('resetCode').value='';document.getElementById('resetPass').value='';switchAuth()}catch(e){setErr('resetErr','连接服务器失败')}}
+
+
+
+
+// API Key real-time validation
+let keyTimer=null;
+function validateKey(){const k=document.getElementById('loginKey').value.trim();const s=document.getElementById('keyStatus');if(!k||!k.startsWith('sk-')){s.textContent='输入Key后自动检测';s.style.color='var(--muted)';return}clearTimeout(keyTimer);keyTimer=setTimeout(async()=>{s.textContent='检测中...';s.style.color='var(--accent)';try{const d=await postJSON(API_BASE+'/api/ai/models',{apiKey:k});const hasChat=d.data?.some(x=>x.id==='deepseek-chat'||x.id==='deepseek-v4-pro');s.textContent=hasChat?'✅ DeepSeek Key有效':'✅ Key有效';s.style.color='#4CD964'}catch(e){s.textContent='⚠️ '+e.message;s.style.color='#F59E0B'}},800)}
+
+// Update topbar dynamically
+function updateTopbar(){const b=document.getElementById('tbSettingsBtn'),a=document.getElementById('tbAcctBtn');if(authToken){b.innerHTML='<span class="line-ic ic-gear"></span>';b.onclick=function(){document.getElementById('acctPanel').classList.add('on');updateAcctUI()};a.textContent=authUser.charAt(0).toUpperCase();a.style.background='linear-gradient(135deg,#D8B76A,#8CBBAE)';a.style.color='#06111D';a.style.borderRadius='50%';a.style.width='34px';a.style.padding='0';a.style.fontWeight='800'}else{b.innerHTML='<span class="line-ic ic-key"></span>';b.onclick=function(){showLogin()};a.innerHTML='<span class="line-ic ic-user"></span>';a.style.background='rgba(255,255,255,.08)';a.style.color='#DFF7FF';a.style.borderRadius='10px';a.style.width='34px';a.style.padding='0';a.style.fontWeight='600'}}
+
+function showSet(){document.getElementById('cfgKey').value=gk();document.getElementById('cfgModel').value=gm();document.getElementById('so').classList.add('on')}
+function hideSet(){document.getElementById('so').classList.remove('on')}
+function saveSet(){localStorage.setItem('bb_key',document.getElementById('cfgKey').value.trim());localStorage.setItem('bb_model',document.getElementById('cfgModel').value.trim());toast('已保存');hideSet()}
+async function testApi(){const k=document.getElementById('cfgKey').value.trim();if(!k)return toast('请填Key','e');toast('测试中...');try{await postJSON(API_BASE+'/api/ai/chat',{apiKey:k,model:document.getElementById('cfgModel').value.trim()||'deepseek-chat',messages:[{role:'user',content:'hi'}],max_tokens:5},authToken);toast('连接成功')}catch(e){toast(e.message,'e')}}
+function focusPrompt(){document.getElementById('inp').focus();document.getElementById('inp').scrollIntoView({behavior:'smooth',block:'center'})}
+function selectedBrief(){return Array.from(document.querySelectorAll('.brief-chip.on')).map(b=>b.textContent.trim()).join('、')}
+function resizeInp(){const i=document.getElementById('inp');i.style.height='auto';i.style.height=Math.min(i.scrollHeight,150)+'px';updatePromptMeter()}
+function toggleBrief(btn){btn.classList.toggle('on');const input=document.getElementById('inp');const brief=selectedBrief();if(input.value.trim()&&brief&&!input.value.includes(brief)){input.value=input.value.trim()+'，偏好：'+brief;resizeInp()}updatePromptMeter();input.focus()}
+const promptIdeas=['周末2天，从我所在城市出发，想找一个小众目的地，预算适中，节奏慢一点','4天3晚，想把自然风景、当地美食和轻松住宿安排在一起，交通不要太折腾','亲子3天，酒店要舒服，白天有体验活动，晚上不要太累','情侣5天，想要海边、拍照、特色餐厅和一晚有仪式感的安排','一个人旅行3天，想安全、省心、有城市漫步和咖啡店路线'];
+function applyPromptText(text){const b=selectedBrief();const input=document.getElementById('inp');input.value=b?text+'，偏好：'+b:text;resizeInp();input.focus()}
+function sparkIdea(){applyPromptText(promptIdeas[Math.floor(Math.random()*promptIdeas.length)]);toast('已放入灵感')}
+function completePrompt(){const input=document.getElementById('inp');let v=input.value.trim();if(!v){sparkIdea();return}const add='请补充每日路线顺序、交通方式、住宿区域、餐厅建议、预算参考、避坑提醒和雨天备选。';if(!v.includes('每日路线'))v=v.replace(/[。,.，、\s]+$/,'')+'，'+add;input.value=v;resizeInp();input.focus();toast('已补全需求')}
+function clearPrompt(){const input=document.getElementById('inp');input.value='';resizeInp();input.focus();toast('已清空')}
+function toggleFocusMode(){document.body.classList.toggle('focus-chat');const on=document.body.classList.contains('focus-chat');const btn=document.getElementById('focusTool');if(btn)btn.textContent=on?'展开':'专注';focusPrompt()}
+function updatePromptMeter(){const input=document.getElementById('inp');if(!input)return;const v=input.value.trim();let score=0;if(v){if(v.length>8)score+=20;if(/[出发去到至]/.test(v))score+=15;if(/\d+\s*[天日]/.test(v))score+=15;if(/预算|价格|经济|舒适|豪华|人均/.test(v))score+=15;if(/酒店|住宿|交通|高铁|航班|自驾/.test(v))score+=15;if(/美食|亲子|老人|情侣|拍照|轻松|不赶|博物馆|海边|山水/.test(v)||selectedBrief())score+=20}score=Math.min(score,100);const s=document.getElementById('promptScore'),f=document.getElementById('promptFill');if(s)s.textContent='完整度 '+score+'%';if(f)f.style.width=score+'%'}
+function qf(t){applyPromptText(t)}
+function qs(t){applyPromptText(t);go(document.getElementById('inp').value)}
+function getTime(){const n=new Date();return n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0')} function addM(type,html){const h=document.getElementById('hist'),m=document.createElement('div');m.className='msg '+type;m.innerHTML=html;if(type==='u'||type==='a'){const t=document.createElement('span');t.className='time';t.textContent=getTime();m.appendChild(t)}h.appendChild(m);h.scrollTop=h.scrollHeight;return m}
+function toast(msg,cls){const t=document.createElement('div');t.className='toast'+(cls?' '+cls:'');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2800)}
+function copyUrl(){if(curHTML){const b=new Blob([curHTML],{type:'text/html'});navigator.clipboard?.writeText(URL.createObjectURL(b)).then(()=>toast('已复制')).catch(()=>toast('复制失败','e'))}else toast('无内容')}
+function openNew(){if(curHTML){const w=window.open('','_blank');w.document.write(curHTML);w.document.close()}else toast('无内容')}
+
+// ══════════════════════════════════════
+// 数据 → HTML 渲染引擎 (huashu-design)
+// ══════════════════════════════════════
+
+const SYS='输出JSON,无markdown。当前年份:'+new Date().getFullYear()+'年。键名双引号,末项无逗号。重要:用户提到从哪里出发,行程必须从出发地开始编写,第一天包含从出发地到目的地的交通安排(航班/高铁等),不得省略出发地直接写目的地景点。\n{"title":"","dest":"","days":0,"startDate":"","weather":"","packing":"","payment":"","flights":[{"a":"航司","f":"航班号","r":"出发→到达","t":"时刻","n":"备注"}],"hotels":[{"ar":"区域","op":[{"n":"酒店","p":"价格","no":"特点"}]}],"itinerary":[{"day":1,"th":"主题","slots":[{"t":"时间","n":"景点","la":0,"lo":0,"d":"描述","h":"营业时间","tk":"门票","rt":"评分"}],"dining":[{"m":"餐别","p":"餐厅","ds":[{"n":"菜名","pr":"价格"}]}]}],"tips":[]}\n航班用真实航司和航班号,坐标la/lo真实,价格参考价。';
+
+const TPL='<!DOCTYPE html><html lang=zh-CN><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>{title}</title><link rel=stylesheet href=https://unpkg.com/leaflet@1.9.4/dist/leaflet.css><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><style>:root{--c:#FDF8F0;--w:#fff;--f:#1B4332;--f2:#2D6A4F;--t:#C75B39;--g:#D4A853;--ink:#1A1A1A;--ink2:#4A4A4A;--ink3:#8A8A8A;--bd:#E8E0D5;--sh:0 4px 16px rgba(0,0,0,.1);--sh2:0 8px 40px rgba(0,0,0,.12);--r:14px;--r2:20px;--r3:28px}*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter,-apple-system,sans-serif;background:var(--c);color:var(--ink);line-height:1.7;-webkit-font-smoothing:antialiased}.serif,h1,h2,h3{font-family:"Noto Serif SC",Georgia,serif;font-weight:600;line-height:1.3}.hero{background:linear-gradient(135deg,var(--f),#081C15);color:white;padding:80px 0 60px;position:relative;overflow:hidden}.hero::after{content:"";position:absolute;bottom:-40px;left:0;right:0;height:80px;background:var(--c);border-radius:50% 50% 0 0}.hero-c{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 24px;text-align:center}.hero-l{display:inline-block;background:rgba(255,255,255,.15);padding:6px 18px;border-radius:20px;font-size:.8rem;letter-spacing:.1em;margin-bottom:20px;border:1px solid rgba(255,255,255,.2)}.hero h1{font-size:clamp(1.8rem,5vw,3rem);font-weight:900;margin-bottom:8px}.hero .sub{font-size:1rem;opacity:.85;margin-bottom:24px;font-weight:300}.hero-meta{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;font-size:.82rem}.hero-meta span{background:rgba(255,255,255,.08);padding:8px 16px;border-radius:24px}.container{max-width:960px;margin:0 auto;padding:0 24px;position:relative}.card{background:var(--w);border-radius:var(--r3);box-shadow:var(--sh);margin-bottom:32px;overflow:hidden;transition:transform .3s,box-shadow .3s}.card:hover{transform:translateY(-3px);box-shadow:var(--sh2)}.card-h{padding:22px 26px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--bd)}.card-h .ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}.card-h h2{font-size:1.2rem}.card-b{padding:22px 26px 26px}.check-card{margin-top:20px;position:relative;z-index:10}.check-card .ic{background:linear-gradient(135deg,var(--f),var(--f2));color:white}.checklist{list-style:none}.checklist li{padding:12px 0;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:12px;font-size:.88rem}.checklist li:last-child{border-bottom:none}.checklist input[type=checkbox]{width:18px;height:18px;accent-color:var(--f)}#map{height:400px;border-radius:var(--r2)}@media(max-width:768px){#map{height:280px}}.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}.g2>div{background:var(--c);padding:14px 16px;border-radius:var(--r)}.g2 h4{font-size:.88rem;margin-bottom:4px}.g2 p{font-size:.8rem;color:var(--ink2)}table{width:100%;border-collapse:collapse;font-size:.84rem}.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}th{text-align:left;padding:10px 12px;background:var(--c);font-weight:600;font-size:.76rem;color:var(--ink3);text-transform:uppercase}td{padding:10px 12px;border-bottom:1px solid var(--bd)}.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600;background:#FFF3D6;color:#8B6914}.disc{background:linear-gradient(135deg,#FFF8E7,#FFF3D6);border:1px solid #F0D68A;border-radius:var(--r);padding:14px 18px;font-size:.78rem;color:#6B5A1E;margin:18px 0}.day-sec{margin-bottom:32px}.day-h{display:flex;align-items:center;gap:12px;margin-bottom:18px}.day-num{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:white}.day-h h3{font-size:1.1rem}.day-th{font-size:.8rem;color:var(--ink3)}.slot{background:var(--w);border-radius:var(--r2);padding:16px 20px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);border-left:3px solid var(--f);display:flex;gap:14px;align-items:flex-start;transition:transform .2s}.slot:hover{transform:translateX(4px)}.slot .st{min-width:70px;font-size:.8rem;color:var(--ink3);font-weight:500}.slot h4{font-size:.95rem;margin-bottom:4px}.slot p{font-size:.82rem;color:var(--ink2)}.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.tag{font-size:.7rem;padding:2px 8px;border-radius:8px;background:var(--c);color:var(--ink3)}.dine{background:var(--c);padding:12px 16px;border-radius:var(--r);margin-bottom:8px}.dine h4{font-size:.85rem;margin-bottom:3px}.dine span{font-size:.78rem;color:var(--ink2);margin-right:8px}.tips{list-style:none}.tips li{padding:9px 0;border-bottom:1px solid var(--bd);font-size:.86rem;display:flex;gap:8px}.tips li:last-child{border-bottom:none}.bb-pin{background:var(--f)!important;color:white!important;border-radius:50%!important;width:28px!important;height:28px!important;display:flex!important;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.3)}@media(max-width:768px){body{font-size:15px}.container{padding:0 12px}.hero{padding:40px 0 35px}.hero h1{font-size:1.4rem}.hero .sub{font-size:.9rem}.hero-meta{gap:8px}.hero-meta span{padding:6px 12px;font-size:.72rem}.card{margin-bottom:20px}.card-h{padding:14px 16px}.card-h h2{font-size:1.05rem}.card-b{padding:14px 16px 16px}.slot{flex-direction:column;gap:4px;padding:14px 16px}.slot .st{min-width:auto;font-size:.75rem}.slot h4{font-size:.9rem}.g2{grid-template-columns:1fr;gap:10px}.g2>div{padding:12px 14px}.g2 h4{font-size:.82rem}.g2 p{font-size:.76rem}table{font-size:.72rem;display:block;overflow-x:auto}th,td{padding:8px 10px;white-space:nowrap}.day-sec{margin-bottom:22px}.day-num{width:34px;height:34px;font-size:.85rem}.day-h h3{font-size:.95rem}#map{height:260px}.hero-l{font-size:.7rem;padding:5px 14px}}</style></head><body><section class=hero><div class=hero-c><div class=hero-l>{dest_upper} · CHINA</div><h1>{title}</h1><p class=sub>{dest} · {days}天{d1}晚 · 精品行程</p><div class=hero-meta><span>📅 {startDate}出发</span><span>🏔 {dest}深度游</span><span>🚗 舒适出行</span></div></div></section><div class=container><div class="card check-card"><div class=card-h><div class=ic>✅</div><h2>出发前待办清单</h2></div><div class=card-b><ul id=cl class=checklist></ul><div style=display:flex;gap:8px;margin-top:12px><input id=nt placeholder=添加待办... style=flex:1;padding:9px 12px;border:1.5px solid var(--bd);border-radius:8px;font-size:.84rem;font-family:inherit;background:var(--c)><button onclick=add() style=padding:9px 18px;background:var(--f);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600>+ 添加</button></div></div></div><script>var t=JSON.parse(localStorage.getItem("td")||"[]");function r(){var u=document.getElementById("cl");u.innerHTML="";t.forEach(function(x,i){var l=document.createElement("li");var c=document.createElement("input");c.type="checkbox";c.checked=x.done;c.onchange=function(){t[i].done=c.checked;s()};var sp=document.createElement("span");sp.textContent=x.text;sp.style.flex="1";if(x.done)sp.style.textDecoration="line-through";var d=document.createElement("button");d.textContent="✕";d.style.cssText="border:none;background:none;color:#e74c3c;cursor:pointer;font-size:14px";d.onclick=function(){t.splice(i,1);s()};l.appendChild(c);l.appendChild(sp);l.appendChild(d);u.appendChild(l)})}function add(){var v=document.getElementById("nt").value.trim();if(v){t.push({text:v,done:false});document.getElementById("nt").value="";s()}}function s(){localStorage.setItem("td",JSON.stringify(t));r()}r()<\/script><div id=map></div><script src=https://unpkg.com/leaflet@1.9.4/dist/leaflet.js><\/script><script>var pts=__C__;var m=L.map("map");L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"©OSM",maxZoom:19}).addTo(m);function amapUrl(a,b,c){var d=encodeURIComponent(c),u=navigator.userAgent;return/Android/i.test(u)?"intent://navi?sourceApplication="+encodeURIComponent("冰冰出行")+"&poiname="+d+"&lat="+b+"&lon="+a+"&dev=0&style=2#Intent;scheme=androidamap;package=com.autonavi.minimap;S.browser_fallback_url=https%3A%2F%2Furi.amap.com%2Fnavigation%3Fto%3D"+a+"%2C"+b+"%2C"+d+"%26mode%3Dcar;end":/iPhone|iPad|iPod/i.test(u)?"iosamap://path?sourceApplication="+encodeURIComponent("冰冰出行")+"&dname="+d+"&dlat="+b+"&dlon="+a+"&dev=0&t=0":"https://uri.amap.com/navigation?to="+a+","+b+","+d+"&mode=car"}pts.forEach(function(p,i){var n=p.name||"";var pop="<b>"+(i+1)+". "+n+"</b><br>"+(p.time||"")+"<br><a href=geo:"+p.lat+","+p.lng+"?q="+encodeURIComponent(n)+" target=_blank style=display:inline-block;padding:5px 14px;background:#4A90D9;color:#fff;border-radius:6px;text-decoration:none;font-size:12px;margin:4px 4px 0 0>导航</a> <a href="+amapUrl(p.lng,p.lat,n)+" target=_blank style=display:inline-block;padding:5px 14px;background:#FF6B35;color:#fff;border-radius:6px;text-decoration:none;font-size:12px;margin:4px 0 0 0>高德</a>";L.marker([p.lat,p.lng],{icon:L.divIcon({className:"bb-pin",html:"<span>"+(i+1)+"</span>",iconSize:[28,28],iconAnchor:[14,14]})}).addTo(m).bindPopup(pop,{maxWidth:260})});var c=pts.map(function(p){return[p.lat,p.lng]});if(c.length>1)L.polyline(c,{dashArray:"6 8",weight:2,color:"#1B4332"}).addTo(m);m.fitBounds(c.length?c:[[0,0]],{padding:[30,30]})<\/script><div class=card><div class=card-h><div class=ic style=background:var(--t);color:white>ℹ</div><h2>行前须知</h2></div><div class=card-b><div class=g2>__PRE__</div></div></div><div class=card><div class=card-h><div class=ic style=background:var(--g);color:white>✈</div><h2>航班推荐 <span style=font-size:.75rem;color:var(--ink3);font-weight:400>待选·请自行核实</span></h2></div><div class=card-b><table>__FL__</table></div></div><div class=card><div class=card-h><div class=ic style=background:var(--t);color:white>🏨</div><h2>酒店推荐 <span style=font-size:.75rem;color:var(--ink3);font-weight:400>按片区+价位</span></h2></div><div class=card-b>__HT__</div></div><div class=disc>⚠️ <strong>免责声明</strong>:本页全部信息(天气、航班、酒店、餐厅、景点、门票、价格等)均为AI基于公开资料整理的参考建议,可能不准确或已过时。请务必在官方渠道核实后再做决定或前往。</div>__IT__<div class=card><div class=card-h><div class=ic style=background:var(--g);color:white>💡</div><h2>全程实用贴士</h2></div><div class=card-b><ul class=tips>__TP__</ul></div></div></div></body></html>';
+
+function renderHTML(data){
+  let coords=[],itinerary='';
+  const DC=[['#0D9488','#14B8A6'],['#EC4899','#F472B6'],['#F59E0B','#FBBF24'],['#8B5CF6','#A78BFA']];
+  const DB=['#0D9488','#EC4899','#F59E0B','#8B5CF6'];
+  const w=data.weather||'',fl=data.flights||[],ht=data.hotels||[],it=data.itinerary||[],tp2=data.tips||[];
+  
+  it.forEach(d=>{d.slots.forEach(s=>{if(s.la&&s.lo)coords.push({lat:s.la,lng:s.lo,name:s.n,time:s.t})})});
+  
+  let pre='<div><h4>🌤 天气</h4><p>'+w+'</p></div>';
+  pre+='<div><h4>👕 穿搭</h4><p>'+(data.packing||'')+'</p></div>';
+  pre+='<div><h4>💳 支付</h4><p>'+(data.payment||'')+'</p></div>';
+  
+  let fls='<tr><th>航司</th><th>航班号</th><th>路线</th><th>时间</th><th>备注</th></tr>';
+  fl.forEach(f=>{fls+='<tr><td>'+(f.a||'')+'</td><td>'+(f.f||'')+'</td><td>'+(f.r||'')+'</td><td>'+(f.t||'')+'</td><td><span class=badge>待选</span> '+(f.n||'')+'</td></tr>'});
+  
+  let hts='';
+  ht.forEach(h=>{hts+='<h4 style="margin:18px 0 8px;font-size:.95rem">📍 '+(h.ar||'')+'</h4><table><tr><th>酒店</th><th>参考价/晚</th><th>特点</th></tr>';(h.op||[]).forEach(o=>{hts+='<tr><td>'+(o.n||'')+'</td><td>¥'+(o.p||'')+'</td><td>'+(o.no||'')+'</td></tr>'});hts+='</table>'});
+  
+  it.forEach(d=>{
+    itinerary+='<div class=day-sec><div class=day-h><div class=day-num style=background:'+DC[(d.day-1)%4][0]+'>'+d.day+'</div><div><h3>Day '+d.day+(d.th?' · '+d.th:'')+'</h3></div></div>';
+    (d.slots||[]).forEach(s=>{
+      itinerary+='<div class=slot style=border-left-color:'+DB[(d.day-1)%4]+'><div class=st>'+(s.t||'')+'</div><div><h4>'+(s.n||'')+'</h4><p>'+(s.d||'')+'</p><div class=tags>';
+      if(s.h)itinerary+='<span class=tag>🕐 '+s.h+'</span>';
+      if(s.tk)itinerary+='<span class=tag>🎫 '+s.tk+'</span>';
+      if(s.rt)itinerary+='<span class=tag>⭐ '+s.rt+'</span>';
+      itinerary+='</div></div></div>';
+    });
+    (d.dining||[]).forEach(m=>{itinerary+='<div class=dine><h4>🍽 '+(m.m||'')+' · '+(m.p||'')+'</h4><div>';(m.ds||[]).forEach(di=>{itinerary+='<span>'+di.n+' ¥'+di.pr+'</span>'});itinerary+='</div></div>'});
+    itinerary+='</div>';
+  });
+  
+  let tps='';tp2.forEach(t=>{tps+='<li><span>💡</span> '+t+'</li>'});
+  
+  return TPL.replace(/{title}/g,data.title).replace(/{dest}/g,data.dest).replace(/{dest_upper}/g,(data.dest||'').toUpperCase()).replace(/{days}/g,data.days).replace(/{d1}/g,data.days-1).replace(/{startDate}/g,data.startDate||'2026年').replace('__PRE__',pre).replace('__FL__',fls).replace('__HT__',hts).replace('__IT__',itinerary).replace('__TP__',tps).replace('__C__',JSON.stringify(coords));
+}
+
+const phaseMsgs=[
+  '⛅ 分析目的地天气...','🗺️ 规划景点路线...','🏨 匹配酒店推荐...',
+  '✈️ 查询航班信息...','🍽️ 挑选当地美食...','📍 编排行程中...',
+  '📋 整理旅游数据...','🧊 生成完整计划...','✨ 最终润色...'
+];
+async function callAPI(prompt,onP){
+  const k=gk(),m=gm();if(!k)throw new Error('请先设置API Key');if(!authToken)throw new Error('请先登录');
+  let phaseIdx=0,done=false,startTime=Date.now(),timer;
+  onP?.('⛅ 分析需求中...',1);
+  const tick=()=>{
+    if(done)return;
+    const elapsed=(Date.now()-startTime)/1000;
+    const ratio=Math.min(elapsed/10,1);
+    const pct=Math.floor(Math.sin(ratio*Math.PI/2)*96)+1;
+    const finalPct=Math.min(pct,96);
+    const msg=phaseMsgs[phaseIdx%phaseMsgs.length];
+    onP?.(msg,finalPct);
+    phaseIdx++;
+    if(ratio>=1){clearInterval(timer);onP?.('⏳ 生成HTML中...',97)}
+  };
+  tick();
+  timer=setInterval(tick,250);
+  try{
+    const d=await postJSON(API_BASE+'/api/ai/chat',{apiKey:k,model:m,messages:[{role:'system',content:SYS},{role:'user',content:prompt}],temperature:0.7,max_tokens:8192},authToken);
+    let json=d.choices?.[0]?.message?.content||'';
+    done=true;clearInterval(timer);
+    onP?.('🎨 渲染页面中...',99);
+    json=json.replace(/^```json?\s*\n?/,'').replace(/\n?```\s*$/,'').trim();
+    json=json.replace(/,(\s*[}\]])/g,'$1');
+    if(!json.endsWith('}')&&!json.endsWith(']')){
+      let depth=0,inStr=false,esc=false;
+      for(let i=0;i<json.length;i++){const c=json[i];if(esc){esc=false;continue}if(c==='\\\\'){esc=true;continue}if(c==='\"')inStr=!inStr;if(inStr)continue;if(c==='{'||c==='[')depth++;if(c==='}'||c===']')depth--}
+      for(let i=0;i<depth;i++)json+='}';
+    }
+    if(!json.includes('{')||!json.includes('}'))throw new Error('非JSON格式,请重试');
+    const s=json.indexOf('{'),e2=json.lastIndexOf('}');
+    if(s>=0&&e2>s)json=json.substring(s,e2+1);
+    let data;
+    try{data=JSON.parse(json)}catch(ex){
+      json=json.replace(/([{,]\s*)(\w+)(\s*:)/g,'$1\"$2\"$3');
+      try{data=JSON.parse(json)}catch(ex2){throw new Error('JSON解析失败,请重试')}
+    }
+    if(!data.title||!data.itinerary)throw new Error('数据不完整,请重试');
+    const html=renderHTML(data);
+    onP?.('✅ 保存中...',100);
+    return html;
+  }catch(e){done=true;clearInterval(timer);throw e}
+}
+
+async function go(promptOverride){
+  if(busy)return;const p=promptOverride||document.getElementById('inp').value.trim();
+  if(!p)return;
+  // Travel boundary check
+  const travelWords=/去|游|旅|玩|天|晚|日|周|月|出发|行程|攻略|计划|景点|酒店|机票|火车|高铁|飞机|周末|假期|暑假|寒假|国庆|五一|春节|元旦|清明|端午|中秋/;
+  const hasPlace=/北京|上海|广州|深圳|杭州|南京|成都|重庆|武汉|西安|长沙|青岛|大连|厦门|三亚|桂林|昆明|丽江|大理|西藏|新疆|内蒙|哈尔滨|长春|沈阳|天津|苏州|无锡|宁波|温州|福州|泉州|郑州|洛阳|开封|合肥|南昌|南宁|贵阳|兰州|西宁|银川|海口|香港|澳门|台北|日本|东京|大阪|京都|韩国|首尔|泰国|曼谷|普吉|越南|新加坡|马来西亚|印尼|巴厘岛|马尔代夫|欧洲|法国|巴黎|意大利|罗马|瑞士|英国|伦敦|美国|纽约|澳洲|悉尼/;
+  if(!travelWords.test(p)&&!hasPlace.test(p)&&!promptOverride){
+    addM('sys','⚠️ 本软件只适用于旅游计划生成');
+    return;
+  }
+  if(!authToken){addM('s','⚠️ 请先登录/注册');showLogin();return}
+  if(!gk()){addM('s','请先配置API Key');showLogin();return}
+  if(!promptOverride){addM('u',p);document.getElementById('inp').value=''}
+  curPrompt=p;busy=true;document.getElementById('sbtn').disabled=true;
+  const m=addM('a','<div>🐋 DeepSeek 生成中</div><div class=progress-wrap><div class=bar-wrap><div class=fill style=width:0%></div></div><span class=pct>0%</span></div><div class=status-text>⛅ 准备中...</div>');
+  const up=(t,pct)=>{const s=m.querySelector('.status-text'),f=m.querySelector('.fill'),p=m.querySelector('.pct');if(s)s.textContent=t;if(f)f.style.width=pct+'%';if(p)p.textContent=pct+'%'};
+  try{
+    const n=new Date();const tc='当前日期:'+n.getFullYear()+'年'+(n.getMonth()+1)+'月'+n.getDate()+'日 周'+['日','一','二','三','四','五','六'][n.getDay()]+'。';
+    const html=await callAPI(tc+p,up);
+    up('💾 保存...',100);curHTML=html;
+    const id='p'+Date.now().toString(36);await savePlan(id,html,p);
+    document.getElementById('pEmpty').style.display='none';
+    const f=document.getElementById('pFrame');f.style.display='block';f.srcdoc=html;
+    document.getElementById('pUrl').textContent=p.slice(0,30);
+    m.innerHTML='✅ 行程已生成<div class=acts><button class=mbtn onclick="sv(\'preview\')">👁预览</button><button class=mbtn onclick="openNew()">🔗新窗口</button><button class=mbtn onclick="revise()">🔧修改</button></div>';
+    sv('preview');loadPlans()
+  }catch(e){m.innerHTML='❌ '+e.message;m.className='msg s'}
+  busy=false;document.getElementById('sbtn').disabled=false
+}
+
+async function revise(){
+  if(!curHTML||!curPrompt)return toast('先生成一个行程');
+  showAction('🔧','修改行程','请输入需要修改的内容', '输入修改意见...', async (fb)=>{
+    if(!fb||!fb.trim())return;
+    addM('u','🔧 修改：'+fb);
+    busy=true;document.getElementById('sbtn').disabled=true;
+    const m=addM('a','<div>🐋 DeepSeek 修改中</div><div class=progress-wrap><div class=bar-wrap><div class=fill style=width:0%></div></div><span class=pct>0%</span></div><div class=status-text>⛅ 分析修改...</div>');
+    const up=(t,pct)=>{const s=m.querySelector('.status-text'),f=m.querySelector('.fill'),p=m.querySelector('.pct');if(s)s.textContent=t;if(f)f.style.width=pct+'%';if(p)p.textContent=pct+'%'};
+    try{
+      const modPrompt=curPrompt+'。修改要求:'+fb;
+      const n=new Date();const tc=n.getFullYear()+'年'+(n.getMonth()+1)+'月'+n.getDate()+'日 周'+['日','一','二','三','四','五','六'][n.getDay()];
+      const html=await callAPI(modPrompt,up);
+      up('💾 保存...',100);curHTML=html;curPrompt=modPrompt;
+      document.getElementById('pEmpty').style.display='none';
+      const f=document.getElementById('pFrame');f.style.display='block';f.srcdoc=html;
+      document.getElementById('pUrl').textContent='已修改';
+      m.innerHTML='✅ 已修改<div class=acts><button class=mbtn onclick="sv(\'preview\')">👁预览</button></div>';
+      sv('preview');const id='p'+Date.now().toString(36);await savePlan(id,html,modPrompt)
+    }catch(e){m.innerHTML='❌ '+e.message;m.className='msg s'}
+    busy=false;document.getElementById('sbtn').disabled=false
+  })
+}
+
+function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open('BB6DB',1);r.onupgradeneeded=e=>{if(!e.target.result.objectStoreNames.contains('p'))e.target.result.createObjectStore('p',{keyPath:'id'})};r.onsuccess=e=>resolve(e.target.result);r.onerror=()=>reject(r.error)})}
+async function savePlan(id,html,prompt){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction('p','readwrite');tx.objectStore('p').put({id,html,prompt,created:Date.now()});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
+async function loadPlans(){const db=await openDB(),list=document.getElementById('pList'),badge=document.getElementById('planBadge');const tx=db.transaction('p','readonly');const r=tx.objectStore('p').getAll();r.onsuccess=()=>{const plans=r.result.sort((a,b)=>b.created-a.created);badge.style.display=plans.length?'inline-block':'none';badge.textContent=plans.length;list.innerHTML=plans.length?plans.map(p=>'<div class=pcard><div class=pi onclick=openPlan("'+p.id+'")><div class=pt>'+p.prompt.slice(0,40)+'</div><div class=pm>'+new Date(p.created).toLocaleDateString('zh-CN')+'·'+(p.html.length/1024).toFixed(0)+'KB</div></div><button class=pd onclick="event.stopPropagation();delPlan(\''+p.id+'\')">🗑</button></div>').join(''):'<p style=text-align:center;color:#94A3B8;padding:40px;font-size:13px>暂无历史行程</p>'}}
+async function openPlan(id){const db=await openDB();const r=db.transaction('p','readonly').objectStore('p').get(id);r.onsuccess=()=>{const p=r.result;if(!p)return;curHTML=p.html;curPrompt=p.prompt;document.getElementById('pEmpty').style.display='none';const f=document.getElementById('pFrame');f.style.display='block';f.srcdoc=p.html;document.getElementById('pUrl').textContent=p.prompt.slice(0,30);sv('preview')}}
+async function delPlan(id){showAction('🗑️','删除确认','确定要删除这条行程记录吗？',null,async()=>{const db=await openDB();db.transaction('p','readwrite').objectStore('p').delete(id);setTimeout(loadPlans,200);toast('已删除')})}
+async function delAll(){const db=await openDB();const tx=db.transaction('p','readwrite');const store=tx.objectStore('p');const r=store.getAll();r.onsuccess=()=>{const plans=r.result;for(const p of plans)store.delete(p.id);setTimeout(loadPlans,300);toast('已删除全部行程')}}
+
+loadPlans();
+function checkNewUser(){if(!localStorage.getItem('bb_visited'))localStorage.setItem('bb_visited','1')}
+checkNewUser();
+document.getElementById('inp').addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,150)+'px';updatePromptMeter()});
+updatePromptMeter();
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){loadPlans();if(curHTML){const f=document.getElementById('pFrame');if(f&&!f.srcdoc)f.srcdoc=curHTML}}});
+window.addEventListener('pageshow',(e)=>{if(e.persisted){loadPlans();document.getElementById('sbtn').disabled=false;busy=false}});
+</script>
+<script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}
+</script>
+</script>
+<style>
+@keyframes bgD{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@keyframes bubA{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(25px,-20px) scale(1.06)}66%{transform:translate(-15px,25px) scale(.95)}}
+@keyframes bubB{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,-15px) scale(1.05)}}
+@keyframes bubC{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(20px,30px) scale(1.04)}66%{transform:translate(-20px,-15px) scale(.92)}}
+@keyframes spinG{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+@keyframes shim{0%{background-position:0% 50%}100%{background-position:200% 50%}}
