@@ -15,7 +15,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3001;
 const DEFAULT_DEV_JWT_SECRET = 'bbtravel_jwt_secret_2026_change_in_prod';
 const isProduction = process.env.NODE_ENV === 'production' || Boolean(process.env.RAILWAY_ENVIRONMENT || process.env.RENDER || process.env.FLY_APP_NAME);
-const JWT_SECRET = process.env.JWT_SECRET || (isProduction ? '' : DEFAULT_DEV_JWT_SECRET);
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
 const DB_PATH = path.resolve(process.env.DB_PATH || path.join(process.env.DATA_DIR || path.join(__dirname, 'data'), 'bbuser.db'));
 const USERNAME_RE = /^[\p{L}\p{N}_-]{3,30}$/u;
@@ -37,9 +36,19 @@ const configuredOrigins = new Set([
 ]);
 const netlifyOriginPattern = /^https:\/\/[a-z0-9-]+\.netlify\.app$/i;
 
-if (!JWT_SECRET || (isProduction && JWT_SECRET === DEFAULT_DEV_JWT_SECRET) || (isProduction && JWT_SECRET.length < 32)) {
-  throw new Error('JWT_SECRET must be set to a strong secret in production');
+function resolveJwtSecret() {
+  const configuredSecret = process.env.JWT_SECRET || '';
+  if (!isProduction) return configuredSecret || DEFAULT_DEV_JWT_SECRET;
+
+  if (configuredSecret && configuredSecret !== DEFAULT_DEV_JWT_SECRET && configuredSecret.length >= 32) {
+    return configuredSecret;
+  }
+
+  console.warn('JWT_SECRET is missing or weak; using an ephemeral random secret for this process.');
+  return crypto.randomBytes(48).toString('hex');
 }
+
+const JWT_SECRET = resolveJwtSecret();
 
 // ── Database Setup ──────────────────────────────────
 let db;
