@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <title>冰冰出行</title>
 <meta http-equiv=Cache-Control content=no-cache,no-store,must-revalidate>
-<meta name="theme-color" content="#4A90D9">
+<meta name="theme-color" content="#6C8BF5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="冰冰出行">
@@ -24,7 +24,7 @@
   --msg-ai:#FFFFFF;
   --glass:rgba(255,255,255,.82);
   --glass-border:rgba(0,184,148,.18);
-  --blur:saturate(1.6) blur(28px);
+  --blur:saturate(1.25) blur(14px);
   --glass-shadow:0 12px 40px rgba(0,0,0,.08),0 0 24px rgba(0,184,148,.04),inset 0 1px 0 rgba(255,255,255,.6);
   --shadow-sm:0 1px 3px rgba(0,0,0,.04);
   --shadow-md:0 4px 12px rgba(0,0,0,.06);
@@ -211,10 +211,10 @@ body{font-family:var(--font-body);color:var(--ink);line-height:1.6;height:100dvh
 
 /* Fable-style motion refresh for Netlify static build */
 :root{
-  --bg:#07111B;--paper:rgba(10,23,36,.72);--ink:#F8F4EC;--ink2:#D7D0C4;--muted:#8E9CA4;
-  --accent:#D8B76A;--accent-glow:rgba(216,183,106,.18);--online:#8CBBAE;
+  --bg:#F6FAFF;--paper:rgba(10,23,36,.72);--ink:#F8F4EC;--ink2:#D7D0C4;--muted:#8E9CA4;
+  --accent:#6C8BF5;--accent-glow:rgba(108,139,245,.18);--online:#FF8A7A;
   --border:rgba(255,255,255,.14);--border2:rgba(255,255,255,.10);
-  --msg-user:linear-gradient(135deg,#D8B76A,#8CBBAE);
+  --msg-user:linear-gradient(135deg,#6C8BF5,#FF8A7A);
   --msg-ai:rgba(255,255,255,.10);
   --glass:rgba(9,20,32,.66);
   --glass-border:rgba(255,255,255,.16);
@@ -222,33 +222,33 @@ body{font-family:var(--font-body);color:var(--ink);line-height:1.6;height:100dvh
 }
 body{
   background:
-    radial-gradient(circle at 12% 8%,rgba(216,183,106,.14),transparent 30%),
+    radial-gradient(circle at 12% 8%,rgba(108,139,245,.14),transparent 30%),
     radial-gradient(circle at 88% 18%,rgba(124,174,163,.12),transparent 32%),
     radial-gradient(circle at 52% 100%,rgba(94,111,143,.13),transparent 36%),
-    linear-gradient(180deg,#07111B 0%,#101927 52%,#070B12 100%);
+    linear-gradient(180deg,#F6FAFF 0%,#FFF8F4 52%,#F5F2FF 100%);
 }
-body::before{content:"";position:fixed;inset:-30%;z-index:-2;background:conic-gradient(from 90deg,transparent,rgba(216,183,106,.07),transparent,rgba(124,174,163,.09),transparent);animation:auroraSpin 42s linear infinite}
+body::before{content:"";position:fixed;inset:-30%;z-index:-2;background:conic-gradient(from 90deg,transparent,rgba(108,139,245,.07),transparent,rgba(124,174,163,.09),transparent);animation:auroraSpin 42s linear infinite}
 body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.55),transparent 84%)}
 @keyframes auroraSpin{to{transform:rotate(360deg)}}
 .fx-stage{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
 .fx-orbit{position:absolute;width:360px;height:360px;border:1px solid rgba(255,255,255,.10);border-radius:50%;right:-140px;top:84px;animation:orbit 18s linear infinite}
-.fx-orbit::before,.fx-orbit::after{content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 24px rgba(216,183,106,.36)}
-.fx-orbit::before{left:42px;top:52px}.fx-orbit::after{right:28px;bottom:72px;background:#8CBBAE;box-shadow:0 0 22px rgba(140,187,174,.32)}
-.fx-line{position:absolute;left:8%;right:8%;top:43%;height:1px;background:linear-gradient(90deg,transparent,rgba(216,183,106,.22),rgba(140,187,174,.18),transparent);transform:rotate(-10deg);animation:scanLine 9s ease-in-out infinite}
+.fx-orbit::before,.fx-orbit::after{content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 24px rgba(108,139,245,.24)}
+.fx-orbit::before{left:42px;top:52px}.fx-orbit::after{right:28px;bottom:72px;background:#FF8A7A;box-shadow:0 0 22px rgba(255,138,122,.22)}
+.fx-line{position:absolute;left:8%;right:8%;top:43%;height:1px;background:linear-gradient(90deg,transparent,rgba(108,139,245,.22),rgba(255,138,122,.18),transparent);transform:rotate(-10deg);animation:scanLine 9s ease-in-out infinite}
 @keyframes orbit{to{transform:rotate(360deg)}}@keyframes scanLine{0%,100%{opacity:.18;transform:translateY(-14px) rotate(-10deg)}50%{opacity:.65;transform:translateY(16px) rotate(-10deg)}}
-.splash{position:fixed;inset:0;z-index:500;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 18% 16%,rgba(216,183,106,.16),transparent 30%),radial-gradient(circle at 82% 24%,rgba(140,187,174,.12),transparent 32%),radial-gradient(circle at 50% 96%,rgba(93,108,139,.16),transparent 36%),linear-gradient(180deg,#07111B,#101927 58%,#060A11);transition:opacity .36s ease}
+.splash{position:fixed;inset:0;z-index:500;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 18% 16%,rgba(108,139,245,.16),transparent 30%),radial-gradient(circle at 82% 24%,rgba(255,138,122,.12),transparent 32%),radial-gradient(circle at 50% 96%,rgba(93,108,139,.16),transparent 36%),linear-gradient(180deg,#F6FAFF,#FFF8F4 58%,#F5F2FF);transition:opacity .36s ease}
 .splash-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.032) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.026) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(circle at center,#000,transparent 76%)}
-.splash-orbit{position:absolute;width:min(86vw,460px);aspect-ratio:1;border:1px solid rgba(216,183,106,.16);border-radius:50%;animation:orbit 28s linear infinite}
-.splash-orbit span{position:absolute;width:10px;height:10px;border-radius:50%;background:#D8B76A;box-shadow:0 0 0 8px rgba(216,183,106,.10),0 0 28px rgba(216,183,106,.26)}
-.splash-orbit span:nth-child(1){left:14%;top:22%}.splash-orbit span:nth-child(2){right:7%;top:48%;background:#8CBBAE;box-shadow:0 0 0 8px rgba(140,187,174,.10),0 0 26px rgba(140,187,174,.24)}.splash-orbit span:nth-child(3){left:48%;bottom:5%;background:#9DA6C8;box-shadow:0 0 0 8px rgba(157,166,200,.10),0 0 24px rgba(157,166,200,.22)}
+.splash-orbit{position:absolute;width:min(86vw,460px);aspect-ratio:1;border:1px solid rgba(108,139,245,.16);border-radius:50%;animation:orbit 28s linear infinite}
+.splash-orbit span{position:absolute;width:10px;height:10px;border-radius:50%;background:#6C8BF5;box-shadow:0 0 0 8px rgba(108,139,245,.10),0 0 28px rgba(108,139,245,.22)}
+.splash-orbit span:nth-child(1){left:14%;top:22%}.splash-orbit span:nth-child(2){right:7%;top:48%;background:#FF8A7A;box-shadow:0 0 0 8px rgba(255,138,122,.10),0 0 26px rgba(255,138,122,.18)}.splash-orbit span:nth-child(3){left:48%;bottom:5%;background:#9DA6C8;box-shadow:0 0 0 8px rgba(157,166,200,.10),0 0 24px rgba(157,166,200,.22)}
 .splash-panel{width:min(86vw,390px);padding:30px 24px 26px;border:1px solid rgba(255,255,255,.14);border-radius:26px;text-align:center;background:rgba(8,20,32,.74);backdrop-filter:blur(24px);box-shadow:0 30px 90px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,255,255,.14);position:relative}
-.brand-mark{width:58px;height:58px;border-radius:18px;margin:0 auto 14px;background:linear-gradient(135deg,#D8B76A,#8CBBAE);display:grid;place-items:center;box-shadow:0 18px 44px rgba(216,183,106,.20)}
-.brand-mark i{width:30px;height:30px;border:2px solid #06111D;border-radius:50%;position:relative;display:block}
-.brand-mark i::before{content:"";position:absolute;left:7px;top:12px;width:15px;height:2px;background:#06111D;transform:rotate(-22deg);box-shadow:8px 6px 0 -1px #06111D}
-.brand-mark i::after{content:"";position:absolute;right:1px;top:3px;width:6px;height:6px;border-radius:50%;background:#06111D}
+.brand-mark{width:58px;height:58px;border-radius:18px;margin:0 auto 14px;background:linear-gradient(135deg,#6C8BF5,#FF8A7A);display:grid;place-items:center;box-shadow:0 18px 44px rgba(108,139,245,.20)}
+.brand-mark i{width:30px;height:30px;border:2px solid #FFFFFF;border-radius:50%;position:relative;display:block}
+.brand-mark i::before{content:"";position:absolute;left:7px;top:12px;width:15px;height:2px;background:#FFFFFF;transform:rotate(-22deg);box-shadow:8px 6px 0 -1px #FFFFFF}
+.brand-mark i::after{content:"";position:absolute;right:1px;top:3px;width:6px;height:6px;border-radius:50%;background:#FFFFFF}
 .splash-kicker{font-size:10px;letter-spacing:.16em;color:var(--accent);margin-bottom:8px}.splash-panel h1{color:#fff;font-size:30px;letter-spacing:-.03em;margin-bottom:8px}.splash-copy{color:#C7D2D6;font-size:13px;line-height:1.7;margin:0 auto 18px;max-width:280px}
-.splash-status{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:18px}.splash-status span{padding:8px 5px;border:1px solid rgba(216,183,106,.14);border-radius:14px;color:#EDE3CE;font-size:11px;background:rgba(255,255,255,.055)}
-.splash-enter{width:100%;height:46px;border:0;border-radius:17px;background:linear-gradient(135deg,#D8B76A,#8CBBAE);color:#06111D;font-weight:800;font-size:14px;font-family:var(--font-body);cursor:pointer;box-shadow:0 14px 36px rgba(216,183,106,.18);transition:transform .18s}.splash-enter:active{transform:scale(.97)}
+.splash-status{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:18px}.splash-status span{padding:8px 5px;border:1px solid rgba(108,139,245,.14);border-radius:14px;color:#EDE3CE;font-size:11px;background:rgba(255,255,255,.055)}
+.splash-enter{width:100%;height:46px;border:0;border-radius:17px;background:linear-gradient(135deg,#6C8BF5,#FF8A7A);color:#FFFFFF;font-weight:800;font-size:14px;font-family:var(--font-body);cursor:pointer;box-shadow:0 14px 36px rgba(108,139,245,.18);transition:transform .18s}.splash-enter:active{transform:scale(.97)}
 .line-ic{display:inline-block;position:relative;width:18px;height:18px;vertical-align:middle;color:currentColor}
 .ic-install::before{content:"";position:absolute;left:4px;top:2px;width:10px;height:14px;border:1.7px solid currentColor;border-radius:3px}.ic-install::after{content:"";position:absolute;left:7px;top:8px;width:5px;height:5px;border-right:1.7px solid currentColor;border-bottom:1.7px solid currentColor;transform:rotate(45deg)}
 .ic-key::before{content:"";position:absolute;left:2px;top:6px;width:7px;height:7px;border:1.8px solid currentColor;border-radius:50%}.ic-key::after{content:"";position:absolute;left:10px;top:9px;width:7px;height:2px;background:currentColor;box-shadow:4px 3px 0 -1px currentColor}
@@ -258,63 +258,63 @@ body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;bac
 .ic-preview::before{content:"";position:absolute;left:1px;top:5px;width:16px;height:9px;border:1.8px solid currentColor;border-radius:50%}.ic-preview::after{content:"";position:absolute;left:7px;top:8px;width:4px;height:4px;background:currentColor;border-radius:50%}
 .ic-history::before{content:"";position:absolute;left:4px;top:2px;width:11px;height:14px;border:1.8px solid currentColor;border-radius:3px}.ic-history::after{content:"";position:absolute;left:7px;top:6px;width:6px;height:1.8px;background:currentColor;box-shadow:0 4px 0 currentColor}
 .ic-guide::before{content:"";position:absolute;left:3px;top:3px;width:12px;height:13px;border:1.8px solid currentColor;border-radius:2px}.ic-guide::after{content:"";position:absolute;left:7px;top:6px;width:5px;height:1.8px;background:currentColor;box-shadow:0 4px 0 currentColor}
-.ic-send::before{content:"";position:absolute;left:3px;top:3px;border-left:13px solid currentColor;border-top:7px solid transparent;border-bottom:7px solid transparent}.ic-send::after{content:"";position:absolute;left:6px;top:8px;width:8px;height:1.6px;background:#06111D;transform:rotate(-18deg)}
+.ic-send::before{content:"";position:absolute;left:3px;top:3px;border-left:13px solid currentColor;border-top:7px solid transparent;border-bottom:7px solid transparent}.ic-send::after{content:"";position:absolute;left:6px;top:8px;width:8px;height:1.6px;background:#FFFFFF;transform:rotate(-18deg)}
 .tb,.bnav{background:rgba(7,19,31,.62);border-color:var(--glass-border);box-shadow:var(--glass-shadow)}
 .bnav{align-items:stretch;gap:4px;min-height:66px;padding:6px 8px calc(6px + var(--sb))}
 .bnav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;height:54px;padding:6px 4px;line-height:1;letter-spacing:0;text-transform:none;border-radius:16px;-webkit-tap-highlight-color:transparent}
 .bnav button:focus{outline:none}.bnav button:focus-visible{outline:1px solid rgba(216,183,106,.42);outline-offset:-3px}
-.bnav button.on{background:rgba(216,183,106,.08);box-shadow:inset 0 0 0 1px rgba(216,183,106,.18)}
+.bnav button.on{background:rgba(108,139,245,.08);box-shadow:inset 0 0 0 1px rgba(108,139,245,.18)}
 .bnav button .ni.line-ic{display:block;width:20px;height:20px;margin:0;flex:0 0 20px;opacity:.62;filter:none;transform-origin:center}
 .bnav button.on .ni.line-ic{opacity:1;transform:translateY(-1px)}
 .bnav .nav-label{display:block;font-size:10px;line-height:1;white-space:nowrap}
 .tb{position:relative;z-index:3;margin:10px 12px 0;border:1px solid var(--glass-border);border-radius:22px}
-.tb-l .ic{border-radius:14px!important;background:linear-gradient(135deg,#D8B76A,#8CBBAE)!important;box-shadow:0 0 26px rgba(216,183,106,.22);color:#06111D}
+.tb-l .ic{border-radius:14px!important;background:linear-gradient(135deg,#6C8BF5,#FF8A7A)!important;box-shadow:0 0 26px rgba(108,139,245,.22);color:#FFFFFF}
 .tb-l span{color:#fff}.tb-install,.tb-btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#DFF7FF}.tb-install{color:var(--accent)}
-.tb-btn:active,.tb-install:active{background:rgba(216,183,106,.14);color:#fff}
+.tb-btn:active,.tb-install:active{background:rgba(108,139,245,.14);color:#fff}
 .view{position:relative;z-index:2}
 .chat-hist{padding:14px 14px 8px;gap:10px}
 .home-hero{position:relative;min-height:230px;border:1px solid rgba(255,255,255,.14);border-radius:30px;padding:20px;overflow:hidden;background:linear-gradient(160deg,rgba(255,255,255,.16),rgba(255,255,255,.05));box-shadow:var(--glass-shadow);isolation:isolate}
-.home-hero::before{content:"";position:absolute;inset:-2px;background:linear-gradient(120deg,rgba(216,183,106,.18),transparent 34%,rgba(140,187,174,.16),transparent 72%);z-index:-1;animation:heroWash 10s ease-in-out infinite alternate}
-.home-hero::after{content:"";position:absolute;width:210px;height:210px;border-radius:44px;background:linear-gradient(135deg,rgba(216,183,106,.16),rgba(140,187,174,.10));right:-64px;bottom:-70px;filter:blur(1px);transform:rotate(18deg);animation:softFloat 9s ease-in-out infinite}
+.home-hero::before{content:"";position:absolute;inset:-2px;background:linear-gradient(120deg,rgba(108,139,245,.18),transparent 34%,rgba(255,138,122,.16),transparent 72%);z-index:-1;animation:heroWash 10s ease-in-out infinite alternate}
+.home-hero::after{content:"";position:absolute;width:210px;height:210px;border-radius:44px;background:linear-gradient(135deg,rgba(108,139,245,.16),rgba(255,138,122,.10));right:-64px;bottom:-70px;filter:blur(1px);transform:rotate(18deg);animation:softFloat 9s ease-in-out infinite}
 @keyframes heroWash{to{transform:translate3d(-18px,12px,0) scale(1.06)}}@keyframes softFloat{50%{transform:translateY(-18px) rotate(26deg)}}
-.hero-kicker{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid rgba(216,183,106,.22);border-radius:999px;color:var(--accent);font-size:11px;background:rgba(216,183,106,.08);backdrop-filter:blur(18px)}
+.hero-kicker{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid rgba(108,139,245,.22);border-radius:999px;color:var(--accent);font-size:11px;background:rgba(108,139,245,.08);backdrop-filter:blur(18px)}
 .home-hero h1{font-size:32px;line-height:1.03;letter-spacing:-.04em;margin:16px 0 10px;color:#fff}
 .home-hero p{max-width:310px;color:#BFD1DF;font-size:13px;line-height:1.75}
 .hero-actions{display:flex;gap:9px;margin:16px 0 0;flex-wrap:wrap}
-.hero-actions button{border:1px solid rgba(255,255,255,.14);border-radius:15px;padding:10px 13px;font-size:12px;font-weight:700;font-family:var(--font-body);cursor:pointer;color:#07131F;background:linear-gradient(135deg,#D8B76A,#8CBBAE);box-shadow:0 10px 28px rgba(216,183,106,.18);transition:transform .18s}
+.hero-actions button{border:1px solid rgba(255,255,255,.14);border-radius:15px;padding:10px 13px;font-size:12px;font-weight:700;font-family:var(--font-body);cursor:pointer;color:#FFFFFF;background:linear-gradient(135deg,#6C8BF5,#FF8A7A);box-shadow:0 10px 28px rgba(108,139,245,.18);transition:transform .18s}
 .hero-actions button.secondary{color:#EAF7FF;background:rgba(255,255,255,.08);box-shadow:none}
 .hero-actions button:active{transform:scale(.96)}
 .hero-device{position:absolute;right:18px;top:72px;width:112px;height:150px;border:1px solid rgba(255,255,255,.16);border-radius:24px;background:rgba(6,17,29,.72);box-shadow:0 28px 80px rgba(0,0,0,.34);padding:9px;transform:rotate(5deg);animation:deviceFloat 6s ease-in-out infinite}
 @keyframes deviceFloat{50%{transform:translateY(-12px) rotate(2deg)}}
-.device-map{height:100%;border-radius:19px;background:linear-gradient(145deg,rgba(216,183,106,.18),rgba(140,187,174,.10)),repeating-linear-gradient(60deg,rgba(255,255,255,.10) 0 1px,transparent 1px 20px);position:relative;overflow:hidden}
-.device-map span{position:absolute;width:11px;height:11px;border-radius:50%;background:#D8B76A;box-shadow:0 0 0 6px rgba(216,183,106,.14)}
-.device-map .p1{left:25px;top:42px}.device-map .p2{right:26px;top:82px;background:#8CBBAE}.device-map .p3{left:48px;bottom:34px;background:#9DA6C8}
+.device-map{height:100%;border-radius:19px;background:linear-gradient(145deg,rgba(108,139,245,.18),rgba(255,138,122,.10)),repeating-linear-gradient(60deg,rgba(255,255,255,.10) 0 1px,transparent 1px 20px);position:relative;overflow:hidden}
+.device-map span{position:absolute;width:11px;height:11px;border-radius:50%;background:#6C8BF5;box-shadow:0 0 0 6px rgba(108,139,245,.14)}
+.device-map .p1{left:25px;top:42px}.device-map .p2{right:26px;top:82px;background:#FF8A7A}.device-map .p3{left:48px;bottom:34px;background:#9DA6C8}
 .route-svg{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke:rgba(255,255,255,.62);stroke-width:2;stroke-dasharray:5 7;animation:dash 5s linear infinite}@keyframes dash{to{stroke-dashoffset:-120}}
 .hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;max-width:340px}
 .hero-stats div{border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:10px;background:rgba(255,255,255,.06)}
 .hero-stats strong{display:block;color:#fff;font-size:15px}.hero-stats span{display:block;color:var(--muted);font-size:10px;margin-top:2px}
-.msg{border:1px solid rgba(255,255,255,.10);backdrop-filter:blur(22px)}.msg.a{color:#EAF7FF;background:rgba(255,255,255,.09)}.msg.u{color:#06111D}.msg.s{border:none}
+.msg{border:1px solid rgba(255,255,255,.10);backdrop-filter:blur(22px)}.msg.a{color:#EAF7FF;background:rgba(255,255,255,.09)}.msg.u{color:#FFFFFF}.msg.s{border:none}
 .chat-inp{margin:0 12px 10px;border:1px solid rgba(255,255,255,.12);border-radius:24px;background:rgba(7,19,31,.72);box-shadow:var(--glass-shadow)}
-.chat-row textarea{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#fff;overflow:hidden;max-height:150px}.chat-row textarea::placeholder{color:#7892A8}.sbtn{background:linear-gradient(135deg,#D8B76A,#8CBBAE);color:#06111D;box-shadow:0 10px 28px rgba(216,183,106,.20)}
-.chips{gap:8px}.chip{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#CFE3F2}.chip:active{background:rgba(216,183,106,.18);color:#fff}
-.composer-brief{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}.brief-chip{border:1px solid rgba(255,255,255,.12);border-radius:15px;padding:8px;background:rgba(255,255,255,.06);color:#CFE3F2;font-size:11px;text-align:left;cursor:pointer;font-family:var(--font-body)}.brief-chip.on{color:#06111D;background:linear-gradient(135deg,#D8B76A,#8CBBAE)}
+.chat-row textarea{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#fff;overflow:hidden;max-height:150px}.chat-row textarea::placeholder{color:#7892A8}.sbtn{background:linear-gradient(135deg,#6C8BF5,#FF8A7A);color:#FFFFFF;box-shadow:0 10px 28px rgba(108,139,245,.20)}
+.chips{gap:8px}.chip{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#CFE3F2}.chip:active{background:rgba(108,139,245,.18);color:#fff}
+.composer-brief{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}.brief-chip{border:1px solid rgba(255,255,255,.12);border-radius:15px;padding:8px;background:rgba(255,255,255,.06);color:#CFE3F2;font-size:11px;text-align:left;cursor:pointer;font-family:var(--font-body)}.brief-chip.on{color:#FFFFFF;background:linear-gradient(135deg,#6C8BF5,#FF8A7A)}
 .dialog-tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:10px}
-.tool-chip{border:1px solid rgba(216,183,106,.18);border-radius:14px;padding:8px 6px;background:rgba(255,255,255,.055);color:#EDE3CE;font-size:11px;font-weight:700;font-family:var(--font-body);cursor:pointer;transition:transform .16s,background .16s}
-.tool-chip:active{transform:scale(.96);background:rgba(216,183,106,.14)}
+.tool-chip{border:1px solid rgba(108,139,245,.18);border-radius:14px;padding:8px 6px;background:rgba(255,255,255,.055);color:#EDE3CE;font-size:11px;font-weight:700;font-family:var(--font-body);cursor:pointer;transition:transform .16s,background .16s}
+.tool-chip:active{transform:scale(.96);background:rgba(108,139,245,.14)}
 .prompt-meter{display:flex;align-items:center;gap:9px;margin:0 2px 10px;color:#9FAEB6;font-size:10px}
-.prompt-meter span{min-width:70px}.meter-bar{height:5px;flex:1;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}.meter-fill{display:block;height:100%;width:0;background:linear-gradient(90deg,#8CBBAE,#D8B76A);border-radius:999px;transition:width .22s}
+.prompt-meter span{min-width:70px}.meter-bar{height:5px;flex:1;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}.meter-fill{display:block;height:100%;width:0;background:linear-gradient(90deg,#FF8A7A,#6C8BF5);border-radius:999px;transition:width .22s}
 body.focus-chat .home-hero,body.focus-chat .msg.welcome{display:none}
 body.focus-chat .chat-hist{padding-top:10px}
 .pempty{background:transparent;color:var(--muted)}.preview-stage{width:min(86vw,360px);aspect-ratio:1.05;border:1px solid rgba(255,255,255,.14);border-radius:34px;background:linear-gradient(145deg,rgba(255,255,255,.14),rgba(255,255,255,.05));box-shadow:var(--glass-shadow);position:relative;overflow:hidden;margin-bottom:22px}
-.preview-stage::before{content:"";position:absolute;inset:28px;border:1px dashed rgba(216,183,106,.26);border-radius:26px;animation:softFloat 8s ease-in-out infinite}
+.preview-stage::before{content:"";position:absolute;inset:28px;border:1px dashed rgba(108,139,245,.22);border-radius:26px;animation:softFloat 8s ease-in-out infinite}
 .preview-card-mini{position:absolute;left:26px;top:30px;width:150px;padding:14px;border-radius:20px;background:rgba(7,19,31,.76);border:1px solid rgba(255,255,255,.12);text-align:left;color:#fff}.preview-card-mini b{font-size:13px}.preview-card-mini span{display:block;font-size:10px;color:var(--muted);margin-top:5px}
-.preview-dot{position:absolute;width:13px;height:13px;border-radius:50%;background:#D8B76A;box-shadow:0 0 0 8px rgba(216,183,106,.12);animation:pinPop 2.8s ease-in-out infinite}.preview-dot.d1{right:66px;top:84px}.preview-dot.d2{right:100px;bottom:72px;background:#8CBBAE;animation-delay:.45s}.preview-dot.d3{left:86px;bottom:48px;background:#9DA6C8;animation-delay:.9s}@keyframes pinPop{50%{transform:scale(1.2)}}
-.ptop{background:rgba(7,19,31,.72);border-color:rgba(255,255,255,.12)}.ptop button{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#EAF7FF}.ptop button.accent{background:linear-gradient(135deg,#D8B76A,#8CBBAE);color:#06111D;border:none}.ptop .url{color:#9CB2C5}
+.preview-dot{position:absolute;width:13px;height:13px;border-radius:50%;background:#6C8BF5;box-shadow:0 0 0 8px rgba(108,139,245,.12);animation:pinPop 2.8s ease-in-out infinite}.preview-dot.d1{right:66px;top:84px}.preview-dot.d2{right:100px;bottom:72px;background:#FF8A7A;animation-delay:.45s}.preview-dot.d3{left:86px;bottom:48px;background:#9DA6C8;animation-delay:.9s}@keyframes pinPop{50%{transform:scale(1.2)}}
+.ptop{background:rgba(7,19,31,.72);border-color:rgba(255,255,255,.12)}.ptop button{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#EAF7FF}.ptop button.accent{background:linear-gradient(135deg,#6C8BF5,#FF8A7A);color:#FFFFFF;border:none}.ptop .url{color:#9CB2C5}
 .plans-head{padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.10);display:flex;justify-content:space-between;align-items:center;background:rgba(7,19,31,.62);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
 .plans-head h3{font-size:16px;color:#F8F4EC;font-weight:800;letter-spacing:0;margin:0}
-.plans-actions{display:flex;gap:7px;align-items:center}.plans-actions button{font-size:12px;padding:7px 11px;border:1px solid rgba(216,183,106,.35);border-radius:12px;background:rgba(255,255,255,.06);cursor:pointer;color:var(--accent);font-family:var(--font-body);font-weight:700}.plans-actions button.danger{border-color:rgba(232,74,95,.42);color:#FF9AA8;background:rgba(232,74,95,.08)}
+.plans-actions{display:flex;gap:7px;align-items:center}.plans-actions button{font-size:12px;padding:7px 11px;border:1px solid rgba(108,139,245,.22);border-radius:12px;background:rgba(255,255,255,.06);cursor:pointer;color:var(--accent);font-family:var(--font-body);font-weight:700}.plans-actions button.danger{border-color:rgba(232,74,95,.42);color:#FF9AA8;background:rgba(232,74,95,.08)}
 #vPlans,#pList{background:transparent}#pList>p{color:#8E9CA4!important}
-.about{background:transparent}.about .hero{background:linear-gradient(135deg,rgba(216,183,106,.18),rgba(140,187,174,.10));border:1px solid rgba(255,255,255,.12);box-shadow:var(--glass-shadow)}.about .tips,.about .step,.pcard{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#EAF7FF}.about .tips li,.about .tips h4,.pcard .pt{color:#EAF7FF}.pcard .pm{color:var(--muted)}
+.about{background:transparent}.about .hero{background:linear-gradient(135deg,rgba(108,139,245,.18),rgba(255,138,122,.10));border:1px solid rgba(255,255,255,.12);box-shadow:var(--glass-shadow)}.about .tips,.about .step,.pcard{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#EAF7FF}.about .tips li,.about .tips h4,.pcard .pt{color:#EAF7FF}.pcard .pm{color:var(--muted)}
 .install-box,.auth-box,.acct-box,.sm{background:rgba(9,20,32,.92);border:1px solid rgba(255,255,255,.14);box-shadow:var(--glass-shadow);color:#fff}.auth-box .field input,.auth-box .field select,.sf input,.acct-box .card input,#actionInput{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.13)!important;color:#fff!important}.auth-box .logo h2,.sm h3,.acct-box .head .info h3,.install-box h3{color:#fff}
 @media(max-width:430px){.tb{gap:8px;padding:10px 12px}.tb-l{gap:8px}.tb-l span{font-size:15px;white-space:nowrap}.tb-install{display:none}.home-hero{min-height:204px;padding:16px}.home-hero h1{font-size:25px;max-width:270px;position:relative;z-index:2}.home-hero p{max-width:235px;position:relative;z-index:2;font-size:12px}.hero-actions{position:relative;z-index:2;margin-top:12px}.hero-device{width:86px;height:122px;right:-10px;top:92px;opacity:.58}.composer-brief{grid-template-columns:1fr 1fr 1fr}.dialog-tools{grid-template-columns:repeat(4,1fr)}.chat-inp{margin-bottom:8px}.chat-row textarea{max-height:132px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
@@ -323,6 +323,9 @@ body.focus-chat .chat-hist{padding-top:10px}
 <body>
 <div class="fx-stage" aria-hidden="true"><div class="fx-orbit"></div><div class="fx-line"></div></div>
 <div id="sp" class="splash">
+  <div class="splash-photos" aria-hidden="true">
+    <span class="photo" data-photo="sea" style="background-image:url('assets/splash-sea.jpg?v=perf2')"></span>
+  </div>
   <div class="splash-grid"></div>
   <div class="splash-orbit"><span></span><span></span><span></span></div>
   <section class="splash-panel">
@@ -330,13 +333,18 @@ body.focus-chat .chat-hist{padding-top:10px}
     <p class="splash-kicker">TRIP OS · MOBILE FIRST</p>
     <h1>冰冰出行</h1>
     <p class="splash-copy">从一句旅行想法，到路线、地图、酒店、餐厅和待办的完整行程板。</p>
-    <div class="splash-status">
-      <span>路线编排</span><span>地图预览</span><span>后端代理</span>
+    <div class="splash-scenes" aria-label="启动页背景场景">
+      <button type="button" class="on" data-scene="sea" aria-pressed="true">海边日落</button>
+      <button type="button" data-scene="city" aria-pressed="false">城市漫步</button>
+      <button type="button" data-scene="road" aria-pressed="false">山野公路</button>
     </div>
-    <button class="splash-enter" onclick="document.getElementById('sp').style.pointerEvents='none';document.getElementById('sp').style.opacity='0';setTimeout(function(){document.getElementById('sp').remove()},360)">进入工作台</button>
+    <div class="splash-status">
+      <span>偏好输入</span><span>照片淡入</span><span>实时进度</span>
+    </div>
+    <button class="splash-enter" onclick="enterWorkspace()">进入工作台</button>
   </section>
 </div>
-<div class="tb"><div class="tb-l"><div class="ic brand-mark" style="background:linear-gradient(135deg,#D8B76A,#8CBBAE)"><i></i></div><span>冰冰出行</span></div><div class="tb-sp"></div>
+<div class="tb"><div class="tb-l"><div class="ic brand-mark" style="background:linear-gradient(135deg,#6C8BF5,#FF8A7A)"><i></i></div><span>冰冰出行</span></div><div class="tb-sp"></div>
 <button class="tb-install" id="btnInstall" onclick="install()"><span class="line-ic ic-install"></span> 安装App</button>
 <button class="tb-btn" id="tbSettingsBtn"><span class="line-ic ic-key"></span></button>
 <span class="tb-badge" id="planBadge" style="display:none;font-size:10px"></span>
@@ -348,29 +356,33 @@ body.focus-chat .chat-hist{padding-top:10px}
   <div class="hero-kicker">LIVE ITINERARY STUDIO</div>
   <h1>把一句想法变成会动的旅行计划</h1>
   <p>路线、酒店、餐厅、地图与待办会被整理成一张可执行的移动旅行工作台。</p>
-  <div class="hero-actions"><button onclick="focusPrompt()">开始规划</button></div>
+  <div class="hero-actions"><button onclick="focusPrompt()">开始规划</button><button class="secondary" onclick="sparkIdea()">随机灵感</button></div>
   <div class="hero-device"><div class="device-map"><svg class="route-svg" viewBox="0 0 100 150"><path d="M22 35 C68 20 78 58 58 76 S30 105 54 128"/></svg><span class="p1"></span><span class="p2"></span><span class="p3"></span></div></div>
 </section>
 <div class="msg a welcome">输入旅行需求，开始规划你的专属行程<br><span style="font-size:12px;opacity:.6">DeepSeek 驱动 · 后端代理生成 · 实时进度</span></div></div>
-<div class="chat-inp"><div class="composer-brief"><button type="button" class="brief-chip on" onclick="toggleBrief(this)">轻松不赶</button><button type="button" class="brief-chip" onclick="toggleBrief(this)">美食优先</button><button type="button" class="brief-chip" onclick="toggleBrief(this)">亲子友好</button></div>
-<div class="dialog-tools"><button type="button" class="tool-chip" onclick="sparkIdea()">灵感</button><button type="button" class="tool-chip" onclick="completePrompt()">补全</button><button type="button" class="tool-chip" id="focusTool" onclick="toggleFocusMode()">专注</button><button type="button" class="tool-chip" onclick="clearPrompt()">清空</button></div>
-<div class="prompt-meter"><span id="promptScore">完整度 0%</span><i class="meter-bar"><b class="meter-fill" id="promptFill"></b></i></div>
-<div class="chat-row"><textarea id="inp" placeholder="例如：从常州出发，4天3晚，想轻松一点，偏自然风景和好吃的小店…" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();go()}"></textarea><button class="sbtn" onclick="go()" id="sbtn"><span class="line-ic ic-send"></span></button></div></div></div>
+<div class="chat-inp">
+  <div class="composer-top"><span>旅行偏好</span><span class="composer-hint">可多选</span></div>
+  <div class="composer-brief"><button type="button" class="brief-chip on" onclick="toggleBrief(this)"><span class="line-ic ic-leaf"></span>轻松不赶</button><button type="button" class="brief-chip" onclick="toggleBrief(this)"><span class="line-ic ic-dine"></span>美食优先</button><button type="button" class="brief-chip" onclick="toggleBrief(this)"><span class="line-ic ic-family"></span>亲子友好</button><button type="button" class="brief-chip" onclick="toggleBrief(this)"><span class="line-ic ic-heart"></span>情侣出行</button></div>
+  <div class="prompt-meter"><span id="promptScore">完整度 0%</span><i class="meter-bar"><b class="meter-fill" id="promptFill"></b></i></div>
+  <div class="chat-row"><textarea id="inp" placeholder="例如：从常州出发，4天3晚，想轻松一点，偏自然风景和好吃的小店…" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();go()}"></textarea><button class="sbtn" onclick="go()" id="sbtn" title="生成行程" aria-label="生成行程"><span class="line-ic ic-send"></span></button></div>
+  <div class="dialog-tools"><button type="button" class="tool-chip" onclick="sparkIdea()" title="写入一条随机旅行灵感"><span class="line-ic ic-spark"></span><span>灵感</span></button><button type="button" class="tool-chip" onclick="completePrompt()" title="补全路线、预算、餐厅和备选项"><span class="line-ic ic-compose"></span><span>补全</span></button><button type="button" class="tool-chip" id="focusTool" onclick="toggleFocusMode()" title="收起欢迎区，专注输入"><span class="line-ic ic-focus"></span><span>专注</span></button><button type="button" class="tool-chip" onclick="clearPrompt()" title="清空当前输入"><span class="line-ic ic-clear"></span><span>清空</span></button></div>
+</div></div>
 
 <div class="view" id="vPreview">
-<div class="ptop"><button onclick="sv('chat')">← 返回</button><span class="url" id="pUrl">未生成</span><button onclick="copyUrl()">📋</button><button onclick="openNew()">🔗</button><button class="accent" onclick="revise()">🔧 修改</button></div>
+<div class="ptop"><button class="back-btn" onclick="sv('chat')"><span class="line-ic ic-back"></span> 返回</button><span class="url" id="pUrl">未生成</span><div class="preview-actions"><button onclick="copyUrl()" title="复制临时预览链接"><span class="line-ic ic-copy"></span><span>复制</span></button><button onclick="openNew()" title="在新窗口打开行程"><span class="line-ic ic-open"></span><span>新窗</span></button><button class="accent" onclick="revise()" title="按反馈重新修改行程"><span class="line-ic ic-edit"></span><span>修改</span></button></div></div>
 <div class="pempty" id="pEmpty"><div class="preview-stage"><div class="preview-card-mini"><b>AI Trip Board</b><span>Day 1 · 抵达与夜游</span><span>Day 2 · 核心路线</span><span>Day 3 · 返程整理</span></div><span class="preview-dot d1"></span><span class="preview-dot d2"></span><span class="preview-dot d3"></span></div><h3>行程预览会在这里展开</h3><p>生成后可查看地图、每日路线、航班酒店、餐厅与待办清单</p></div>
 <iframe class="pframe" id="pFrame" style="display:none" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe></div>
 
 <div class="view" id="vAbout">
 <div class="about">
   <div class="hero"><div class="icon">📖</div><h2>使用指南</h2><p>冰冰出行 · 功能介绍与操作说明</p></div>
-  <div class="tips" style="margin-bottom:14px"><h4>🔘 底部导航栏</h4><li><b>💬 对话</b> — 输入需求，AI生成行程</li><li><b>👁 预览</b> — 查看完整行程（地图+日程+航班+酒店）</li><li><b>📋 历史</b> — 查看、删除已生成行程</li><li><b>📖 说明</b> — 当前页面，功能帮助</li></div>
-  <div class="tips" style="margin-bottom:14px"><h4>对话页操作</h4><li><b>输入框</b> — 输入旅行需求，点击发送按钮</li><li><b>输入工具</b> — 可随机获取灵感、补全需求、进入专注模式或清空输入</li><li><b>进度条</b> — AI生成时实时显示百分比</li><li><b>完成后</b> — 可使用「预览/新窗口/修改」按钮</li></div>
-  <div class="tips" style="margin-bottom:14px"><h4>顶栏功能</h4><li><b>安装App</b> — PWA安装到桌面</li><li><b>账户入口</b> — 未登录时打开登录，登录后查看账户</li><li><b>头像按钮</b> — 登录后显示用户名首字母</li></div>
-  <div class="tips"><h4>💡 技巧</h4><li>说清楚出发地，AI从出发地开始编排</li><li>可加"经济型"或"豪华游"需求</li><li>行程生成后随时点🔧修改</li><li>地图弹窗点「高德」跳转导航</li></div>
+  <div class="tips" style="margin-bottom:14px"><h4>当前界面进度</h4><li><b>启动页</b> — 暖色旅行照片动态淡入，支持海边/城市/山野场景切换</li><li><b>对话页</b> — 已更新为浅色温和风格，并加入偏好、完整度、输入工具分区</li><li><b>偏好标签</b> — 轻松不赶、美食优先、亲子友好、情侣出行均可多选</li><li><b>行程页</b> — 生成后的预览模板已同步新色板，避免暗绿色旧风格</li></div>
+  <div class="tips" style="margin-bottom:14px"><h4>底部导航栏</h4><li><b>对话</b> — 输入需求，调用 AI 生成行程</li><li><b>预览</b> — 查看地图、日程、航班、酒店和待办清单</li><li><b>历史</b> — 查看、打开、删除已生成行程</li><li><b>指引</b> — 当前页面，查看功能说明和使用技巧</li></div>
+  <div class="tips" style="margin-bottom:14px"><h4>对话页操作</h4><li><b>旅行偏好</b> — 多选后会作为偏好写入提示词</li><li><b>灵感</b> — 随机生成一条旅行需求示例</li><li><b>补全</b> — 自动追加路线、预算、餐厅、避坑和雨天备选要求</li><li><b>专注/展开</b> — 收起或恢复欢迎区，让输入区更聚焦</li><li><b>清空</b> — 清除当前输入并重置完整度</li></div>
+  <div class="tips" style="margin-bottom:14px"><h4>安装与账户</h4><li><b>安装App</b> — 通过浏览器 PWA 能力添加到桌面或主屏幕</li><li><b>账户入口</b> — 未登录时打开登录/注册，登录后进入账户面板</li><li><b>API Key</b> — 登录页可配置 DeepSeek Key 和模型</li><li><b>历史数据</b> — 行程记录保存在本机 IndexedDB 中</li></div>
+  <div class="tips"><h4>实用技巧</h4><li>说清楚出发地，AI 会从出发地开始编排</li><li>写明天数、预算、人群关系和住宿偏好，完整度会更高</li><li>情侣出行可补充纪念日、拍照、餐厅氛围或海边需求</li><li>行程生成后可点「修改」继续调整</li><li>地图弹窗点「高德」跳转导航</li></div>
 </div></div>
-<div class="view" id="vPlans"><div class="plans-head"><h3>历史行程</h3><div class="plans-actions"><button class="danger" onclick="showAction('🗑️','删除全部','确定要删除所有历史行程吗？此操作不可撤销。',null,()=>delAll())">删除全部</button><button onclick="newChat()">新对话</button></div></div><div style="flex:1;overflow-y:auto" id="pList"><p style="text-align:center;color:#94A3B8;padding:40px;font-size:13px">暂无历史行程</p></div></div>
+<div class="view" id="vPlans"><div class="plans-head"><div class="plans-title"><h3>历史行程</h3><p>本机保存的生成记录</p></div><div class="plans-actions"><button class="danger" onclick="showAction('🗑️','删除全部','确定要删除所有历史行程吗？此操作不可撤销。',null,()=>delAll())"><span class="line-ic ic-trash"></span>删除</button><button onclick="newChat()"><span class="line-ic ic-plus"></span>新对话</button></div></div><div style="flex:1;overflow-y:auto" id="pList"><p style="text-align:center;color:#94A3B8;padding:40px;font-size:13px">暂无历史行程</p></div></div>
 
 <div class="bnav"><button class="on" onclick="sv('chat')"><span class="ni line-ic ic-chat"></span><span class="nav-label">对话</span></button><button onclick="sv('preview')"><span class="ni line-ic ic-preview"></span><span class="nav-label">预览</span></button><button onclick="sv('plans')"><span class="ni line-ic ic-history"></span><span class="nav-label">历史</span></button><button onclick="sv('about')"><span class="ni line-ic ic-guide"></span><span class="nav-label">指引</span></button></div>
 
@@ -431,20 +443,32 @@ function showAction(icon,title,msg,placeholder,onConfirm){
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();window._dp=e})
 
 // ── Auth System ─────────────────────────────────────
-const API_BASE = (()=>{const s=localStorage.getItem('bb_server');if(s)return s;const h=window.location.hostname;return h==='127.0.0.1'||h==='localhost'?'http://127.0.0.1:3001':'https://bingbing-travel-production.up.railway.app'})();
+const PROD_API_BASE='https://bingbing-travel-production.up.railway.app';
+const API_BASE = (()=>{const s=localStorage.getItem('bb_server');return (s||PROD_API_BASE).replace(/\/+$/,'')})();
 let authToken = localStorage.getItem('bb_token') || '';
 let authUser = localStorage.getItem('bb_user') || '';
-async function postJSON(url,payload,token){
+function apiCandidates(){return Array.from(new Set([API_BASE,PROD_API_BASE].filter(Boolean)))}
+function apiError(message,extra){const e=new Error(message);return Object.assign(e,extra||{})}
+async function requestJSON(url,options){
+  const method=options?.method||'GET',payload=options?.payload,token=options?.token;
   let r,d;
+  const ctrl=typeof AbortController!=='undefined'?new AbortController():null;
+  const timer=ctrl?setTimeout(()=>ctrl.abort(),12000):null;
   try{
-    r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(payload)});
+    r=await fetch(url,{method,headers:{...(payload?{'Content-Type':'application/json'}:{}),...(token?{Authorization:'Bearer '+token}:{})},...(payload?{body:JSON.stringify(payload)}:{}),...(ctrl?{signal:ctrl.signal}:{})});
   }catch(e){
-    throw new Error('网络连接失败：请确认后端服务已部署并允许当前 Netlify 域名访问');
+    throw apiError(e&&e.name==='AbortError'?'连接服务器超时，请稍后重试':'连接服务器失败：请检查网络或后端服务地址',{network:true});
+  }finally{
+    if(timer)clearTimeout(timer);
   }
   try{d=await r.json()}catch{d={error:'服务器返回了无法解析的内容'}}
-  if(!r.ok)throw new Error(d.error||('请求失败 HTTP '+r.status));
+  if(!r.ok)throw apiError(d.error||('请求失败 HTTP '+r.status),{status:r.status});
   return d;
 }
+async function apiRequest(path,options){let last;for(const base of apiCandidates()){try{return await requestJSON(base+path,options)}catch(e){last=e;if(!e.network)throw e}}throw last||new Error('连接服务器失败')}
+async function postAPI(path,payload,token){return apiRequest(path,{method:'POST',payload,token})}
+async function getAPI(path,token){return apiRequest(path,{method:'GET',token})}
+async function postJSON(url,payload,token){return requestJSON(url,{method:'POST',payload,token})}
 
 function showLogin(){document.getElementById('authOverlay').classList.add('on');document.getElementById('authLogin').style.display='block';document.getElementById('authRegister').style.display='none';document.getElementById('authForgot').style.display='none';document.getElementById('authReset').style.display='none';document.getElementById('authSubtitle').textContent='登录';document.getElementById('loginKey').value=gk();document.getElementById('loginModel').value=gm();document.getElementById('keyStatus').textContent='输入Key后自动检测';document.getElementById('keyStatus').style.color='var(--muted)'}
 function closeAuth(){document.getElementById('authOverlay').classList.remove('on')}
@@ -452,19 +476,19 @@ function showRegister(){document.getElementById('authLogin').style.display='none
 function switchAuth(){document.getElementById('authLogin').style.display='block';document.getElementById('authRegister').style.display='none';document.getElementById('authForgot').style.display='none';document.getElementById('authReset').style.display='none';document.getElementById('authSubtitle').textContent='登录';document.getElementById('regErr').style.display='none';document.getElementById('loginErr').style.display='none'}
 function showForgot(){document.getElementById('authLogin').style.display='none';document.getElementById('authRegister').style.display='none';document.getElementById('authForgot').style.display='block';document.getElementById('authReset').style.display='none';document.getElementById('authSubtitle').textContent='找回密码';document.getElementById('forgotErr').style.display='none';document.getElementById('forgotUser').value='';document.getElementById('forgotQQ').value=''}
 function setErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block'}
-async function doRegister(){const u=document.getElementById('regUser').value.trim(),p=document.getElementById('regPass').value,p2=document.getElementById('regPass2').value;document.getElementById('regErr').style.display='none';if(u.length<3||u.length>30)return setErr('regErr','用户名需3-30字符');if(p.length<8)return setErr('regErr','密码至少8字符');if(p!==p2)return setErr('regErr','两次密码不一致');try{const r=await fetch(API_BASE+'/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});const d=await r.json();if(!r.ok)return setErr('regErr',d.error||'注册失败');authToken=d.token;authUser=d.username;localStorage.setItem('bb_token',authToken);localStorage.setItem('bb_user',authUser);toast('注册成功！欢迎 '+authUser);document.getElementById('regUser').value='';document.getElementById('regPass').value='';document.getElementById('regPass2').value='';switchAuth()}catch(e){setErr('regErr','连接服务器失败')}}
-async function doLogin(){const u=document.getElementById('loginUser').value.trim(),p=document.getElementById('loginPass').value,k=document.getElementById('loginKey').value.trim(),m=document.getElementById('loginModel').value;document.getElementById('loginErr').style.display='none';if(!u||!p)return setErr('loginErr','请填写用户名和密码');if(k){localStorage.setItem('bb_key',k)}if(m){localStorage.setItem('bb_model',m)}try{const r=await fetch(API_BASE+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});const d=await r.json();if(!r.ok)return setErr('loginErr',d.error||'登录失败');authToken=d.token;authUser=d.username;localStorage.setItem('bb_token',authToken);localStorage.setItem('bb_user',authUser);closeAuth();updateAcctUI();toast('登录成功！');document.getElementById('loginUser').value='';document.getElementById('loginPass').value=''}catch(e){setErr('loginErr','连接服务器失败')}}
+async function doRegister(){const u=document.getElementById('regUser').value.trim(),p=document.getElementById('regPass').value,p2=document.getElementById('regPass2').value;document.getElementById('regErr').style.display='none';if(u.length<3||u.length>30)return setErr('regErr','用户名需3-30字符');if(p.length<8)return setErr('regErr','密码至少8字符');if(p!==p2)return setErr('regErr','两次密码不一致');try{const d=await postAPI('/api/auth/register',{username:u,password:p});authToken=d.token;authUser=d.username;localStorage.setItem('bb_token',authToken);localStorage.setItem('bb_user',authUser);toast('注册成功！欢迎 '+authUser);document.getElementById('regUser').value='';document.getElementById('regPass').value='';document.getElementById('regPass2').value='';closeAuth();updateAcctUI()}catch(e){setErr('regErr',e.message||'连接服务器失败')}}
+async function doLogin(){const u=document.getElementById('loginUser').value.trim(),p=document.getElementById('loginPass').value,k=document.getElementById('loginKey').value.trim(),m=document.getElementById('loginModel').value;document.getElementById('loginErr').style.display='none';if(!u||!p)return setErr('loginErr','请填写用户名和密码');if(k){localStorage.setItem('bb_key',k)}if(m){localStorage.setItem('bb_model',m)}try{const d=await postAPI('/api/auth/login',{username:u,password:p});authToken=d.token;authUser=d.username;localStorage.setItem('bb_token',authToken);localStorage.setItem('bb_user',authUser);closeAuth();updateAcctUI();toast('登录成功！');document.getElementById('loginUser').value='';document.getElementById('loginPass').value=''}catch(e){setErr('loginErr',e.message||'连接服务器失败')}}
 function doLogout(){authToken='';authUser='';localStorage.removeItem('bb_token');localStorage.removeItem('bb_user');updateAcctUI();document.getElementById('acctPanel').classList.remove('on');toast('已退出');setTimeout(showLogin,600)}
-async function updateAcctUI(){const nameEl=document.getElementById('acctName'),statEl=document.getElementById('acctStatus'),avatarEl=document.getElementById('acctAvatar'),usrEl=document.getElementById('acctUsername'),createdEl=document.getElementById('acctCreated'),qqEl=document.getElementById('acctQQ');updateTopbar();if(!authToken){nameEl.textContent='未登录';statEl.textContent='点击设置按钮登录或注册';avatarEl.innerHTML='<span class="line-ic ic-user"></span>';usrEl.textContent='-';createdEl.textContent='-';qqEl.textContent='未绑定';return}nameEl.textContent=authUser;statEl.textContent='已登录';avatarEl.textContent=authUser.charAt(0).toUpperCase();try{const r=await fetch(API_BASE+'/api/user/profile',{headers:{Authorization:'Bearer '+authToken}});if(!r.ok)throw new Error();const d=await r.json();usrEl.textContent=d.username;createdEl.textContent=d.created_at?d.created_at.slice(0,10):'-';qqEl.textContent=d.qq_email||'未绑定';if(d.qq_email)document.getElementById('qqInput').value=d.qq_email}catch{usrEl.textContent=authUser}};updateTopbar();
-async function bindQQ(){if(!authToken)return toast('请先登录','e');const qq=document.getElementById('qqInput').value.trim();if(!/^\d{5,12}@qq\.com$/.test(qq))return toast('请输入正确QQ邮箱格式','e');try{const r=await fetch(API_BASE+'/api/user/bind-qq',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+authToken},body:JSON.stringify({qqEmail:qq})});if(r.ok){toast('QQ邮箱绑定成功');updateAcctUI()}else{const d=await r.json();toast(d.error||'绑定失败','e')}}catch{toast('连接服务器失败','e')}}
-async function changePwd(){if(!authToken)return toast('请先登录','e');const old=document.getElementById('oldPass').value,nu=document.getElementById('newPass').value;if(!old)return toast('请输入原密码','e');if(nu.length<8)return toast('新密码至少8字符','e');try{const r=await fetch(API_BASE+'/api/auth/change-password',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+authToken},body:JSON.stringify({oldPassword:old,newPassword:nu})});if(r.ok){toast('密码已修改');document.getElementById('oldPass').value='';document.getElementById('newPass').value=''}else{const d=await r.json();toast(d.error||'修改失败','e')}}catch{toast('连接服务器失败','e')}}
+async function updateAcctUI(){const nameEl=document.getElementById('acctName'),statEl=document.getElementById('acctStatus'),avatarEl=document.getElementById('acctAvatar'),usrEl=document.getElementById('acctUsername'),createdEl=document.getElementById('acctCreated'),qqEl=document.getElementById('acctQQ');updateTopbar();if(!authToken){nameEl.textContent='未登录';statEl.textContent='点击设置按钮登录或注册';avatarEl.innerHTML='<span class="line-ic ic-user"></span>';usrEl.textContent='-';createdEl.textContent='-';qqEl.textContent='未绑定';return}nameEl.textContent=authUser;statEl.textContent='已登录';avatarEl.textContent=authUser.charAt(0).toUpperCase();try{const d=await getAPI('/api/user/profile',authToken);usrEl.textContent=d.username;createdEl.textContent=d.created_at?d.created_at.slice(0,10):'-';qqEl.textContent=d.qq_email||'未绑定';if(d.qq_email)document.getElementById('qqInput').value=d.qq_email}catch(e){usrEl.textContent=authUser;if(e.status===401)doLogout()}};updateTopbar();
+async function bindQQ(){if(!authToken)return toast('请先登录','e');const qq=document.getElementById('qqInput').value.trim();if(!/^\d{5,12}@qq\.com$/.test(qq))return toast('请输入正确QQ邮箱格式','e');try{const d=await postAPI('/api/user/bind-qq',{qqEmail:qq},authToken);toast(d.message||'QQ邮箱绑定成功');updateAcctUI()}catch(e){toast(e.message||'连接服务器失败','e')}}
+async function changePwd(){if(!authToken)return toast('请先登录','e');const old=document.getElementById('oldPass').value,nu=document.getElementById('newPass').value;if(!old)return toast('请输入原密码','e');if(nu.length<8)return toast('新密码至少8字符','e');try{const d=await postAPI('/api/auth/change-password',{oldPassword:old,newPassword:nu},authToken);toast(d.message||'密码已修改');document.getElementById('oldPass').value='';document.getElementById('newPass').value=''}catch(e){toast(e.message||'连接服务器失败','e')}}
 
 function showAcctPanel(){document.getElementById('acctPanel').classList.add('on');updateAcctUI()}
 function hideAcctPanel(){document.getElementById('acctPanel').classList.remove('on')}
 
 let resetUsername='';
-async function requestCode(){const u=document.getElementById('forgotUser').value.trim(),q=document.getElementById('forgotQQ').value.trim();document.getElementById('forgotErr').style.display='none';if(!u||!q)return setErr('forgotErr','请填写用户名和QQ邮箱');if(!/^\d{5,12}@qq\.com$/.test(q))return setErr('forgotErr','QQ邮箱格式不正确');try{const r=await fetch(API_BASE+'/api/auth/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,qqEmail:q})});const d=await r.json();if(!r.ok)return setErr('forgotErr',d.error||'请求失败');resetUsername=u;if(d.devCode){toast('验证码: '+d.devCode)}document.getElementById('authForgot').style.display='none';document.getElementById('authReset').style.display='block';document.getElementById('authSubtitle').textContent='输入验证码';document.getElementById('resetErr').style.display='none'}catch(e){setErr('forgotErr','连接服务器失败')}}
-async function doReset(){const code=document.getElementById('resetCode').value.trim(),np=document.getElementById('resetPass').value;document.getElementById('resetErr').style.display='none';if(code.length!==6)return setErr('resetErr','请输入6位验证码');if(np.length<8)return setErr('resetErr','新密码至少8字符');try{const r=await fetch(API_BASE+'/api/auth/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:resetUsername,code:code,newPassword:np})});const d=await r.json();if(!r.ok)return setErr('resetErr',d.error||'重置失败');toast('密码已重置，请重新登录');document.getElementById('resetCode').value='';document.getElementById('resetPass').value='';switchAuth()}catch(e){setErr('resetErr','连接服务器失败')}}
+async function requestCode(){const u=document.getElementById('forgotUser').value.trim(),q=document.getElementById('forgotQQ').value.trim();document.getElementById('forgotErr').style.display='none';if(!u||!q)return setErr('forgotErr','请填写用户名和QQ邮箱');if(!/^\d{5,12}@qq\.com$/.test(q))return setErr('forgotErr','QQ邮箱格式不正确');try{const d=await postAPI('/api/auth/forgot-password',{username:u,qqEmail:q});resetUsername=u;toast(d.devCode?'验证码: '+d.devCode:(d.message||'验证码已发送'));document.getElementById('authForgot').style.display='none';document.getElementById('authReset').style.display='block';document.getElementById('authSubtitle').textContent='输入验证码';document.getElementById('resetErr').style.display='none'}catch(e){setErr('forgotErr',e.message||'连接服务器失败')}}
+async function doReset(){const code=document.getElementById('resetCode').value.trim(),np=document.getElementById('resetPass').value;document.getElementById('resetErr').style.display='none';if(code.length!==6)return setErr('resetErr','请输入6位验证码');if(np.length<8)return setErr('resetErr','新密码至少8字符');try{const d=await postAPI('/api/auth/reset-password',{username:resetUsername,code:code,newPassword:np});toast(d.message||'密码已重置，请重新登录');document.getElementById('resetCode').value='';document.getElementById('resetPass').value='';switchAuth()}catch(e){setErr('resetErr',e.message||'连接服务器失败')}}
 
 
 
@@ -474,22 +498,41 @@ let keyTimer=null;
 function validateKey(){const k=document.getElementById('loginKey').value.trim();const s=document.getElementById('keyStatus');if(!k||!k.startsWith('sk-')){s.textContent='输入Key后自动检测';s.style.color='var(--muted)';return}clearTimeout(keyTimer);keyTimer=setTimeout(async()=>{s.textContent='检测中...';s.style.color='var(--accent)';try{const d=await postJSON(API_BASE+'/api/ai/models',{apiKey:k});const hasChat=d.data?.some(x=>x.id==='deepseek-chat'||x.id==='deepseek-v4-pro');s.textContent=hasChat?'✅ DeepSeek Key有效':'✅ Key有效';s.style.color='#4CD964'}catch(e){s.textContent='⚠️ '+e.message;s.style.color='#F59E0B'}},800)}
 
 // Update topbar dynamically
-function updateTopbar(){const b=document.getElementById('tbSettingsBtn'),a=document.getElementById('tbAcctBtn');if(authToken){b.innerHTML='<span class="line-ic ic-gear"></span>';b.onclick=function(){document.getElementById('acctPanel').classList.add('on');updateAcctUI()};a.textContent=authUser.charAt(0).toUpperCase();a.style.background='linear-gradient(135deg,#D8B76A,#8CBBAE)';a.style.color='#06111D';a.style.borderRadius='50%';a.style.width='34px';a.style.padding='0';a.style.fontWeight='800'}else{b.innerHTML='<span class="line-ic ic-key"></span>';b.onclick=function(){showLogin()};a.innerHTML='<span class="line-ic ic-user"></span>';a.style.background='rgba(255,255,255,.08)';a.style.color='#DFF7FF';a.style.borderRadius='10px';a.style.width='34px';a.style.padding='0';a.style.fontWeight='600'}}
+function updateTopbar(){const b=document.getElementById('tbSettingsBtn'),a=document.getElementById('tbAcctBtn');if(authToken){b.innerHTML='<span class="line-ic ic-gear"></span>';b.onclick=function(){document.getElementById('acctPanel').classList.add('on');updateAcctUI()};a.textContent=authUser.charAt(0).toUpperCase();a.style.setProperty('background','linear-gradient(135deg,#6C8BF5,#FF8A7A)','important');a.style.setProperty('color','#fff','important');a.style.borderRadius='50%';a.style.width='34px';a.style.padding='0';a.style.fontWeight='800'}else{b.innerHTML='<span class="line-ic ic-key"></span>';b.onclick=function(){showLogin()};a.innerHTML='<span class="line-ic ic-user"></span>';a.style.setProperty('background','rgba(255,255,255,.72)','important');a.style.setProperty('color','#6C8BF5','important');a.style.borderRadius='10px';a.style.width='34px';a.style.padding='0';a.style.fontWeight='600'}}
 
 function showSet(){document.getElementById('cfgKey').value=gk();document.getElementById('cfgModel').value=gm();document.getElementById('so').classList.add('on')}
 function hideSet(){document.getElementById('so').classList.remove('on')}
 function saveSet(){localStorage.setItem('bb_key',document.getElementById('cfgKey').value.trim());localStorage.setItem('bb_model',document.getElementById('cfgModel').value.trim());toast('已保存');hideSet()}
 async function testApi(){const k=document.getElementById('cfgKey').value.trim();if(!k)return toast('请填Key','e');toast('测试中...');try{await postJSON(API_BASE+'/api/ai/chat',{apiKey:k,model:document.getElementById('cfgModel').value.trim()||'deepseek-chat',messages:[{role:'user',content:'hi'}],max_tokens:5},authToken);toast('连接成功')}catch(e){toast(e.message,'e')}}
+const splashPhotoUrls={sea:'assets/splash-sea.jpg?v=perf2',city:'assets/splash-city.jpg?v=perf2',road:'assets/splash-road.jpg?v=perf2'};
+let splashCleanup=function(){};
+function setSplashScene(sp,scene){const photo=sp.querySelector('.splash-photos .photo'),url=splashPhotoUrls[scene]||splashPhotoUrls.sea;if(!photo||photo.dataset.photo===scene)return;photo.style.opacity='0';window.setTimeout(()=>{if(!document.body.contains(photo))return;photo.style.backgroundImage='url("'+url+'")';photo.dataset.photo=scene;photo.style.opacity='.97'},120)}
+function releaseSplashAssets(sp){splashCleanup();if(!sp)return;sp.querySelectorAll('.photo').forEach(photo=>{photo.style.animation='none';photo.style.transition='none';photo.style.opacity='0';photo.style.backgroundImage='none'});const photos=sp.querySelector('.splash-photos');if(photos){photos.classList.add('releasing');photos.textContent=''}sp.querySelectorAll('.splash-orbit,.splash-grid').forEach(n=>n.remove())}
+function enterWorkspace(){document.body.classList.add('workspace-ready');const fx=document.querySelector('.fx-stage');if(fx)fx.remove();const sp=document.getElementById('sp');if(!sp)return;sp.style.pointerEvents='none';sp.style.opacity='0';window.setTimeout(()=>{releaseSplashAssets(sp);sp.remove()},220)}
+function initSplash(){const sp=document.getElementById('sp');if(!sp)return;const btns=sp.querySelectorAll('.splash-scenes button');btns.forEach(btn=>{btn.onclick=()=>{const scene=btn.dataset.scene;setSplashScene(sp,scene);btns.forEach(b=>{b.classList.toggle('on',b===btn);b.setAttribute('aria-pressed',b===btn?'true':'false')})}});const mq=window.matchMedia?window.matchMedia('(pointer:fine)'):null,rm=window.matchMedia?window.matchMedia('(prefers-reduced-motion: reduce)'):null;if((mq&&!mq.matches)||(rm&&rm.matches))return;let raf=0,lastPoint=null;const rafn=window.requestAnimationFrame||function(cb){return setTimeout(cb,16)},caf=window.cancelAnimationFrame||clearTimeout;const apply=()=>{raf=0;const p=lastPoint;if(!p||!document.body.contains(sp))return;const r=sp.getBoundingClientRect(),x=(p.clientX-r.left)/r.width-.5,y=(p.clientY-r.top)/r.height-.5;sp.style.setProperty('--spx',(-x*5).toFixed(1)+'px');sp.style.setProperty('--spy',(-y*4).toFixed(1)+'px');sp.style.setProperty('--panelx',(x*1.5).toFixed(1)+'px');sp.style.setProperty('--panely',(y*1.5).toFixed(1)+'px')};const move=e=>{lastPoint=e;if(!raf)raf=rafn(apply)},leave=()=>{lastPoint=null;sp.style.setProperty('--spx','0px');sp.style.setProperty('--spy','0px');sp.style.setProperty('--panelx','0px');sp.style.setProperty('--panely','0px')};sp.addEventListener('pointermove',move,{passive:true});sp.addEventListener('pointerleave',leave);splashCleanup=()=>{if(raf)caf(raf);sp.removeEventListener('pointermove',move);sp.removeEventListener('pointerleave',leave);lastPoint=null;raf=0}}
+initSplash();
 function focusPrompt(){document.getElementById('inp').focus();document.getElementById('inp').scrollIntoView({behavior:'smooth',block:'center'})}
-function selectedBrief(){return Array.from(document.querySelectorAll('.brief-chip.on')).map(b=>b.textContent.trim()).join('、')}
+function selectedBriefList(){return Array.from(document.querySelectorAll('.brief-chip.on')).map(b=>b.textContent.trim())}
+function selectedBrief(){return selectedBriefList().join('、')}
 function resizeInp(){const i=document.getElementById('inp');i.style.height='auto';i.style.height=Math.min(i.scrollHeight,150)+'px';updatePromptMeter()}
-function toggleBrief(btn){btn.classList.toggle('on');const input=document.getElementById('inp');const brief=selectedBrief();if(input.value.trim()&&brief&&!input.value.includes(brief)){input.value=input.value.trim()+'，偏好：'+brief;resizeInp()}updatePromptMeter();input.focus()}
-const promptIdeas=['周末2天，从我所在城市出发，想找一个小众目的地，预算适中，节奏慢一点','4天3晚，想把自然风景、当地美食和轻松住宿安排在一起，交通不要太折腾','亲子3天，酒店要舒服，白天有体验活动，晚上不要太累','情侣5天，想要海边、拍照、特色餐厅和一晚有仪式感的安排','一个人旅行3天，想安全、省心、有城市漫步和咖啡店路线'];
-function applyPromptText(text){const b=selectedBrief();const input=document.getElementById('inp');input.value=b?text+'，偏好：'+b:text;resizeInp();input.focus()}
-function sparkIdea(){applyPromptText(promptIdeas[Math.floor(Math.random()*promptIdeas.length)]);toast('已放入灵感')}
+function stripPreferenceSuffix(text){return text.replace(/(?:，?偏好：[^。,.，\n]*)+$/,'').trim()}
+function sanitizePromptForBriefs(text,briefs){let v=stripPreferenceSuffix(text);if(briefs.includes('情侣出行')){v=v.replace(/一个人旅行/g,'情侣旅行').replace(/一个人/g,'两个人').replace(/独自|独行|单人/g,'情侣').replace(/亲子/g,'情侣')}if(briefs.includes('亲子友好')){v=v.replace(/一个人旅行/g,'亲子旅行').replace(/一个人/g,'一家人').replace(/情侣旅行/g,'亲子旅行').replace(/情侣/g,'亲子').replace(/独自|独行|单人/g,'亲子')}return v}
+function withBriefSuffix(text,briefs){const base=sanitizePromptForBriefs(text,briefs).replace(/[。,.，、\s]+$/,'');return briefs.length?base+'，偏好：'+briefs.join('、'):base}
+function toggleBrief(btn){const label=btn.textContent.trim();btn.classList.toggle('on');if(btn.classList.contains('on')&&(label==='亲子友好'||label==='情侣出行')){document.querySelectorAll('.brief-chip.on').forEach(chip=>{const t=chip.textContent.trim();if(chip!==btn&&(t==='亲子友好'||t==='情侣出行'))chip.classList.remove('on')})}const input=document.getElementById('inp'),briefs=selectedBriefList();if(input.value.trim()){input.value=withBriefSuffix(input.value,briefs);resizeInp()}updatePromptMeter();input.focus()}
+const promptIdeas=[
+  {text:'周末2天，从我所在城市出发，想找一个小众目的地，预算适中，节奏慢一点',audience:'general'},
+  {text:'4天3晚，想把自然风景、当地美食和轻松住宿安排在一起，交通不要太折腾',audience:'general'},
+  {text:'亲子3天，酒店要舒服，白天有体验活动，晚上不要太累',audience:'family'},
+  {text:'情侣5天，想要海边、拍照、特色餐厅和一晚有仪式感的安排',audience:'couple'},
+  {text:'一个人旅行3天，想安全、省心、有城市漫步和咖啡店路线',audience:'solo'}
+];
+function ideaMatchesBrief(idea,briefs){if(briefs.includes('情侣出行'))return idea.audience==='couple'||idea.audience==='general';if(briefs.includes('亲子友好'))return idea.audience==='family'||idea.audience==='general';return true}
+function fallbackIdea(briefs){if(briefs.includes('情侣出行'))return '情侣3天2晚，想要轻松不赶、适合拍照、有氛围感餐厅和城市漫步路线';if(briefs.includes('亲子友好'))return '亲子3天2晚，酒店要舒服，白天有体验活动，晚上不要太累';return '3天2晚，想要轻松不赶、交通省心、有当地美食和散步路线'}
+function applyPromptText(text){const input=document.getElementById('inp'),briefs=selectedBriefList();input.value=withBriefSuffix(text,briefs);resizeInp();input.focus()}
+function sparkIdea(){const briefs=selectedBriefList(),pool=promptIdeas.filter(idea=>ideaMatchesBrief(idea,briefs));const picked=pool[Math.floor(Math.random()*pool.length)]||{text:fallbackIdea(briefs)};applyPromptText(picked.text);toast('已放入灵感')}
 function completePrompt(){const input=document.getElementById('inp');let v=input.value.trim();if(!v){sparkIdea();return}const add='请补充每日路线顺序、交通方式、住宿区域、餐厅建议、预算参考、避坑提醒和雨天备选。';if(!v.includes('每日路线'))v=v.replace(/[。,.，、\s]+$/,'')+'，'+add;input.value=v;resizeInp();input.focus();toast('已补全需求')}
 function clearPrompt(){const input=document.getElementById('inp');input.value='';resizeInp();input.focus();toast('已清空')}
-function toggleFocusMode(){document.body.classList.toggle('focus-chat');const on=document.body.classList.contains('focus-chat');const btn=document.getElementById('focusTool');if(btn)btn.textContent=on?'展开':'专注';focusPrompt()}
+function toggleFocusMode(){document.body.classList.toggle('focus-chat');const on=document.body.classList.contains('focus-chat');const btn=document.getElementById('focusTool');if(btn)btn.innerHTML='<span class="line-ic ic-focus"></span><span>'+(on?'展开':'专注')+'</span>';focusPrompt()}
 function updatePromptMeter(){const input=document.getElementById('inp');if(!input)return;const v=input.value.trim();let score=0;if(v){if(v.length>8)score+=20;if(/[出发去到至]/.test(v))score+=15;if(/\d+\s*[天日]/.test(v))score+=15;if(/预算|价格|经济|舒适|豪华|人均/.test(v))score+=15;if(/酒店|住宿|交通|高铁|航班|自驾/.test(v))score+=15;if(/美食|亲子|老人|情侣|拍照|轻松|不赶|博物馆|海边|山水/.test(v)||selectedBrief())score+=20}score=Math.min(score,100);const s=document.getElementById('promptScore'),f=document.getElementById('promptFill');if(s)s.textContent='完整度 '+score+'%';if(f)f.style.width=score+'%'}
 function qf(t){applyPromptText(t)}
 function qs(t){applyPromptText(t);go(document.getElementById('inp').value)}
@@ -504,12 +547,14 @@ function openNew(){if(curHTML){const w=window.open('','_blank');w.document.write
 
 const SYS='输出JSON,无markdown。当前年份:'+new Date().getFullYear()+'年。键名双引号,末项无逗号。重要:用户提到从哪里出发,行程必须从出发地开始编写,第一天包含从出发地到目的地的交通安排(航班/高铁等),不得省略出发地直接写目的地景点。\n{"title":"","dest":"","days":0,"startDate":"","weather":"","packing":"","payment":"","flights":[{"a":"航司","f":"航班号","r":"出发→到达","t":"时刻","n":"备注"}],"hotels":[{"ar":"区域","op":[{"n":"酒店","p":"价格","no":"特点"}]}],"itinerary":[{"day":1,"th":"主题","slots":[{"t":"时间","n":"景点","la":0,"lo":0,"d":"描述","h":"营业时间","tk":"门票","rt":"评分"}],"dining":[{"m":"餐别","p":"餐厅","ds":[{"n":"菜名","pr":"价格"}]}]}],"tips":[]}\n航班用真实航司和航班号,坐标la/lo真实,价格参考价。';
 
-const TPL='<!DOCTYPE html><html lang=zh-CN><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>{title}</title><link rel=stylesheet href=https://unpkg.com/leaflet@1.9.4/dist/leaflet.css><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><style>:root{--c:#FDF8F0;--w:#fff;--f:#1B4332;--f2:#2D6A4F;--t:#C75B39;--g:#D4A853;--ink:#1A1A1A;--ink2:#4A4A4A;--ink3:#8A8A8A;--bd:#E8E0D5;--sh:0 4px 16px rgba(0,0,0,.1);--sh2:0 8px 40px rgba(0,0,0,.12);--r:14px;--r2:20px;--r3:28px}*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter,-apple-system,sans-serif;background:var(--c);color:var(--ink);line-height:1.7;-webkit-font-smoothing:antialiased}.serif,h1,h2,h3{font-family:"Noto Serif SC",Georgia,serif;font-weight:600;line-height:1.3}.hero{background:linear-gradient(135deg,var(--f),#081C15);color:white;padding:80px 0 60px;position:relative;overflow:hidden}.hero::after{content:"";position:absolute;bottom:-40px;left:0;right:0;height:80px;background:var(--c);border-radius:50% 50% 0 0}.hero-c{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 24px;text-align:center}.hero-l{display:inline-block;background:rgba(255,255,255,.15);padding:6px 18px;border-radius:20px;font-size:.8rem;letter-spacing:.1em;margin-bottom:20px;border:1px solid rgba(255,255,255,.2)}.hero h1{font-size:clamp(1.8rem,5vw,3rem);font-weight:900;margin-bottom:8px}.hero .sub{font-size:1rem;opacity:.85;margin-bottom:24px;font-weight:300}.hero-meta{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;font-size:.82rem}.hero-meta span{background:rgba(255,255,255,.08);padding:8px 16px;border-radius:24px}.container{max-width:960px;margin:0 auto;padding:0 24px;position:relative}.card{background:var(--w);border-radius:var(--r3);box-shadow:var(--sh);margin-bottom:32px;overflow:hidden;transition:transform .3s,box-shadow .3s}.card:hover{transform:translateY(-3px);box-shadow:var(--sh2)}.card-h{padding:22px 26px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--bd)}.card-h .ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}.card-h h2{font-size:1.2rem}.card-b{padding:22px 26px 26px}.check-card{margin-top:20px;position:relative;z-index:10}.check-card .ic{background:linear-gradient(135deg,var(--f),var(--f2));color:white}.checklist{list-style:none}.checklist li{padding:12px 0;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:12px;font-size:.88rem}.checklist li:last-child{border-bottom:none}.checklist input[type=checkbox]{width:18px;height:18px;accent-color:var(--f)}#map{height:400px;border-radius:var(--r2)}@media(max-width:768px){#map{height:280px}}.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}.g2>div{background:var(--c);padding:14px 16px;border-radius:var(--r)}.g2 h4{font-size:.88rem;margin-bottom:4px}.g2 p{font-size:.8rem;color:var(--ink2)}table{width:100%;border-collapse:collapse;font-size:.84rem}.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}th{text-align:left;padding:10px 12px;background:var(--c);font-weight:600;font-size:.76rem;color:var(--ink3);text-transform:uppercase}td{padding:10px 12px;border-bottom:1px solid var(--bd)}.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600;background:#FFF3D6;color:#8B6914}.disc{background:linear-gradient(135deg,#FFF8E7,#FFF3D6);border:1px solid #F0D68A;border-radius:var(--r);padding:14px 18px;font-size:.78rem;color:#6B5A1E;margin:18px 0}.day-sec{margin-bottom:32px}.day-h{display:flex;align-items:center;gap:12px;margin-bottom:18px}.day-num{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:white}.day-h h3{font-size:1.1rem}.day-th{font-size:.8rem;color:var(--ink3)}.slot{background:var(--w);border-radius:var(--r2);padding:16px 20px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);border-left:3px solid var(--f);display:flex;gap:14px;align-items:flex-start;transition:transform .2s}.slot:hover{transform:translateX(4px)}.slot .st{min-width:70px;font-size:.8rem;color:var(--ink3);font-weight:500}.slot h4{font-size:.95rem;margin-bottom:4px}.slot p{font-size:.82rem;color:var(--ink2)}.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.tag{font-size:.7rem;padding:2px 8px;border-radius:8px;background:var(--c);color:var(--ink3)}.dine{background:var(--c);padding:12px 16px;border-radius:var(--r);margin-bottom:8px}.dine h4{font-size:.85rem;margin-bottom:3px}.dine span{font-size:.78rem;color:var(--ink2);margin-right:8px}.tips{list-style:none}.tips li{padding:9px 0;border-bottom:1px solid var(--bd);font-size:.86rem;display:flex;gap:8px}.tips li:last-child{border-bottom:none}.bb-pin{background:var(--f)!important;color:white!important;border-radius:50%!important;width:28px!important;height:28px!important;display:flex!important;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.3)}@media(max-width:768px){body{font-size:15px}.container{padding:0 12px}.hero{padding:40px 0 35px}.hero h1{font-size:1.4rem}.hero .sub{font-size:.9rem}.hero-meta{gap:8px}.hero-meta span{padding:6px 12px;font-size:.72rem}.card{margin-bottom:20px}.card-h{padding:14px 16px}.card-h h2{font-size:1.05rem}.card-b{padding:14px 16px 16px}.slot{flex-direction:column;gap:4px;padding:14px 16px}.slot .st{min-width:auto;font-size:.75rem}.slot h4{font-size:.9rem}.g2{grid-template-columns:1fr;gap:10px}.g2>div{padding:12px 14px}.g2 h4{font-size:.82rem}.g2 p{font-size:.76rem}table{font-size:.72rem;display:block;overflow-x:auto}th,td{padding:8px 10px;white-space:nowrap}.day-sec{margin-bottom:22px}.day-num{width:34px;height:34px;font-size:.85rem}.day-h h3{font-size:.95rem}#map{height:260px}.hero-l{font-size:.7rem;padding:5px 14px}}</style></head><body><section class=hero><div class=hero-c><div class=hero-l>{dest_upper} · CHINA</div><h1>{title}</h1><p class=sub>{dest} · {days}天{d1}晚 · 精品行程</p><div class=hero-meta><span>📅 {startDate}出发</span><span>🏔 {dest}深度游</span><span>🚗 舒适出行</span></div></div></section><div class=container><div class="card check-card"><div class=card-h><div class=ic>✅</div><h2>出发前待办清单</h2></div><div class=card-b><ul id=cl class=checklist></ul><div style=display:flex;gap:8px;margin-top:12px><input id=nt placeholder=添加待办... style=flex:1;padding:9px 12px;border:1.5px solid var(--bd);border-radius:8px;font-size:.84rem;font-family:inherit;background:var(--c)><button onclick=add() style=padding:9px 18px;background:var(--f);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600>+ 添加</button></div></div></div><script>var t=JSON.parse(localStorage.getItem("td")||"[]");function r(){var u=document.getElementById("cl");u.innerHTML="";t.forEach(function(x,i){var l=document.createElement("li");var c=document.createElement("input");c.type="checkbox";c.checked=x.done;c.onchange=function(){t[i].done=c.checked;s()};var sp=document.createElement("span");sp.textContent=x.text;sp.style.flex="1";if(x.done)sp.style.textDecoration="line-through";var d=document.createElement("button");d.textContent="✕";d.style.cssText="border:none;background:none;color:#e74c3c;cursor:pointer;font-size:14px";d.onclick=function(){t.splice(i,1);s()};l.appendChild(c);l.appendChild(sp);l.appendChild(d);u.appendChild(l)})}function add(){var v=document.getElementById("nt").value.trim();if(v){t.push({text:v,done:false});document.getElementById("nt").value="";s()}}function s(){localStorage.setItem("td",JSON.stringify(t));r()}r()<\/script><div id=map></div><script src=https://unpkg.com/leaflet@1.9.4/dist/leaflet.js><\/script><script>var pts=__C__;var m=L.map("map");L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"©OSM",maxZoom:19}).addTo(m);function amapUrl(a,b,c){var d=encodeURIComponent(c),u=navigator.userAgent;return/Android/i.test(u)?"intent://navi?sourceApplication="+encodeURIComponent("冰冰出行")+"&poiname="+d+"&lat="+b+"&lon="+a+"&dev=0&style=2#Intent;scheme=androidamap;package=com.autonavi.minimap;S.browser_fallback_url=https%3A%2F%2Furi.amap.com%2Fnavigation%3Fto%3D"+a+"%2C"+b+"%2C"+d+"%26mode%3Dcar;end":/iPhone|iPad|iPod/i.test(u)?"iosamap://path?sourceApplication="+encodeURIComponent("冰冰出行")+"&dname="+d+"&dlat="+b+"&dlon="+a+"&dev=0&t=0":"https://uri.amap.com/navigation?to="+a+","+b+","+d+"&mode=car"}pts.forEach(function(p,i){var n=p.name||"";var pop="<b>"+(i+1)+". "+n+"</b><br>"+(p.time||"")+"<br><a href=geo:"+p.lat+","+p.lng+"?q="+encodeURIComponent(n)+" target=_blank style=display:inline-block;padding:5px 14px;background:#4A90D9;color:#fff;border-radius:6px;text-decoration:none;font-size:12px;margin:4px 4px 0 0>导航</a> <a href="+amapUrl(p.lng,p.lat,n)+" target=_blank style=display:inline-block;padding:5px 14px;background:#FF6B35;color:#fff;border-radius:6px;text-decoration:none;font-size:12px;margin:4px 0 0 0>高德</a>";L.marker([p.lat,p.lng],{icon:L.divIcon({className:"bb-pin",html:"<span>"+(i+1)+"</span>",iconSize:[28,28],iconAnchor:[14,14]})}).addTo(m).bindPopup(pop,{maxWidth:260})});var c=pts.map(function(p){return[p.lat,p.lng]});if(c.length>1)L.polyline(c,{dashArray:"6 8",weight:2,color:"#1B4332"}).addTo(m);m.fitBounds(c.length?c:[[0,0]],{padding:[30,30]})<\/script><div class=card><div class=card-h><div class=ic style=background:var(--t);color:white>ℹ</div><h2>行前须知</h2></div><div class=card-b><div class=g2>__PRE__</div></div></div><div class=card><div class=card-h><div class=ic style=background:var(--g);color:white>✈</div><h2>航班推荐 <span style=font-size:.75rem;color:var(--ink3);font-weight:400>待选·请自行核实</span></h2></div><div class=card-b><table>__FL__</table></div></div><div class=card><div class=card-h><div class=ic style=background:var(--t);color:white>🏨</div><h2>酒店推荐 <span style=font-size:.75rem;color:var(--ink3);font-weight:400>按片区+价位</span></h2></div><div class=card-b>__HT__</div></div><div class=disc>⚠️ <strong>免责声明</strong>:本页全部信息(天气、航班、酒店、餐厅、景点、门票、价格等)均为AI基于公开资料整理的参考建议,可能不准确或已过时。请务必在官方渠道核实后再做决定或前往。</div>__IT__<div class=card><div class=card-h><div class=ic style=background:var(--g);color:white>💡</div><h2>全程实用贴士</h2></div><div class=card-b><ul class=tips>__TP__</ul></div></div></div></body></html>';
+const TPL='<!DOCTYPE html><html lang=zh-CN><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>{title}</title><link rel=stylesheet href=https://unpkg.com/leaflet@1.9.4/dist/leaflet.css><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel=stylesheet><style>:root{--c:#FDF8F0;--w:#fff;--f:#6C8BF5;--f2:#7EB6FF;--t:#C75B39;--g:#D4A853;--ink:#1A1A1A;--ink2:#4A4A4A;--ink3:#8A8A8A;--bd:#E8E0D5;--sh:0 4px 16px rgba(0,0,0,.1);--sh2:0 8px 40px rgba(0,0,0,.12);--r:14px;--r2:20px;--r3:28px}*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter,-apple-system,sans-serif;background:var(--c);color:var(--ink);line-height:1.7;-webkit-font-smoothing:antialiased}.serif,h1,h2,h3{font-family:"Noto Serif SC",Georgia,serif;font-weight:600;line-height:1.3}.hero{background:linear-gradient(135deg,var(--f),#FF8A7A);color:white;padding:80px 0 60px;position:relative;overflow:hidden}.hero::after{content:"";position:absolute;bottom:-40px;left:0;right:0;height:80px;background:var(--c);border-radius:50% 50% 0 0}.hero-c{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 24px;text-align:center}.hero-l{display:inline-block;background:rgba(255,255,255,.15);padding:6px 18px;border-radius:20px;font-size:.8rem;letter-spacing:.1em;margin-bottom:20px;border:1px solid rgba(255,255,255,.2)}.hero h1{font-size:clamp(1.8rem,5vw,3rem);font-weight:900;margin-bottom:8px}.hero .sub{font-size:1rem;opacity:.85;margin-bottom:24px;font-weight:300}.hero-meta{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;font-size:.82rem}.hero-meta span{background:rgba(255,255,255,.08);padding:8px 16px;border-radius:24px}.container{max-width:960px;margin:0 auto;padding:0 24px;position:relative}.card{background:var(--w);border-radius:var(--r3);box-shadow:var(--sh);margin-bottom:32px;overflow:hidden;transition:transform .3s,box-shadow .3s}.card:hover{transform:translateY(-3px);box-shadow:var(--sh2)}.card-h{padding:22px 26px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--bd)}.card-h .ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}.card-h h2{font-size:1.2rem}.card-b{padding:22px 26px 26px}.check-card{margin-top:20px;position:relative;z-index:10}.check-card .ic{background:linear-gradient(135deg,var(--f),var(--f2));color:white}.checklist{list-style:none}.checklist li{padding:12px 0;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:12px;font-size:.88rem}.checklist li:last-child{border-bottom:none}.checklist input[type=checkbox]{width:18px;height:18px;accent-color:var(--f)}#map{height:400px;border-radius:var(--r2)}@media(max-width:768px){#map{height:280px}}.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}.g2>div{background:var(--c);padding:14px 16px;border-radius:var(--r)}.g2 h4{font-size:.88rem;margin-bottom:4px}.g2 p{font-size:.8rem;color:var(--ink2)}table{width:100%;border-collapse:collapse;font-size:.84rem}.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}th{text-align:left;padding:10px 12px;background:var(--c);font-weight:600;font-size:.76rem;color:var(--ink3);text-transform:uppercase}td{padding:10px 12px;border-bottom:1px solid var(--bd)}.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600;background:#FFF3D6;color:#8B6914}.disc{background:linear-gradient(135deg,#FFF8E7,#FFF3D6);border:1px solid #F0D68A;border-radius:var(--r);padding:14px 18px;font-size:.78rem;color:#6B5A1E;margin:18px 0}.day-sec{margin-bottom:32px}.day-h{display:flex;align-items:center;gap:12px;margin-bottom:18px}.day-num{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:white}.day-h h3{font-size:1.1rem}.day-th{font-size:.8rem;color:var(--ink3)}.slot{background:var(--w);border-radius:var(--r2);padding:16px 20px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);border-left:3px solid var(--f);display:flex;gap:14px;align-items:flex-start;transition:transform .2s}.slot:hover{transform:translateX(4px)}.slot .st{min-width:70px;font-size:.8rem;color:var(--ink3);font-weight:500}.slot h4{font-size:.95rem;margin-bottom:4px}.slot p{font-size:.82rem;color:var(--ink2)}.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.tag{font-size:.7rem;padding:2px 8px;border-radius:8px;background:var(--c);color:var(--ink3)}.dine{background:var(--c);padding:12px 16px;border-radius:var(--r);margin-bottom:8px}.dine h4{font-size:.85rem;margin-bottom:3px}.dine span{font-size:.78rem;color:var(--ink2);margin-right:8px}.tips{list-style:none}.tips li{padding:9px 0;border-bottom:1px solid var(--bd);font-size:.86rem;display:flex;gap:8px}.tips li:last-child{border-bottom:none}.bb-pin{background:var(--f)!important;color:white!important;border-radius:50%!important;width:28px!important;height:28px!important;display:flex!important;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.3)}@media(max-width:768px){body{font-size:15px}.container{padding:0 12px}.hero{padding:40px 0 35px}.hero h1{font-size:1.4rem}.hero .sub{font-size:.9rem}.hero-meta{gap:8px}.hero-meta span{padding:6px 12px;font-size:.72rem}.card{margin-bottom:20px}.card-h{padding:14px 16px}.card-h h2{font-size:1.05rem}.card-b{padding:14px 16px 16px}.slot{flex-direction:column;gap:4px;padding:14px 16px}.slot .st{min-width:auto;font-size:.75rem}.slot h4{font-size:.9rem}.g2{grid-template-columns:1fr;gap:10px}.g2>div{padding:12px 14px}.g2 h4{font-size:.82rem}.g2 p{font-size:.76rem}table{font-size:.72rem;display:block;overflow-x:auto}th,td{padding:8px 10px;white-space:nowrap}.day-sec{margin-bottom:22px}.day-num{width:34px;height:34px;font-size:.85rem}.day-h h3{font-size:.95rem}#map{height:260px}.hero-l{font-size:.7rem;padding:5px 14px}}</style></head><body><section class=hero><div class=hero-c><div class=hero-l>{dest_upper} · CHINA</div><h1>{title}</h1><p class=sub>{dest} · {days}天{d1}晚 · 精品行程</p><div class=hero-meta><span>📅 {startDate}出发</span><span>🏔 {dest}深度游</span><span>🚗 舒适出行</span></div></div></section><div class=container><div class="card check-card"><div class=card-h><div class=ic>✅</div><h2>出发前待办清单</h2></div><div class=card-b><ul id=cl class=checklist></ul><div style=display:flex;gap:8px;margin-top:12px><input id=nt placeholder=添加待办... style=flex:1;padding:9px 12px;border:1.5px solid var(--bd);border-radius:8px;font-size:.84rem;font-family:inherit;background:var(--c)><button onclick=add() style=padding:9px 18px;background:var(--f);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600>+ 添加</button></div></div></div><script>var t=JSON.parse(localStorage.getItem("td")||"[]");function r(){var u=document.getElementById("cl");u.innerHTML="";t.forEach(function(x,i){var l=document.createElement("li");var c=document.createElement("input");c.type="checkbox";c.checked=x.done;c.onchange=function(){t[i].done=c.checked;s()};var sp=document.createElement("span");sp.textContent=x.text;sp.style.flex="1";if(x.done)sp.style.textDecoration="line-through";var d=document.createElement("button");d.textContent="✕";d.style.cssText="border:none;background:none;color:#e74c3c;cursor:pointer;font-size:14px";d.onclick=function(){t.splice(i,1);s()};l.appendChild(c);l.appendChild(sp);l.appendChild(d);u.appendChild(l)})}function add(){var v=document.getElementById("nt").value.trim();if(v){t.push({text:v,done:false});document.getElementById("nt").value="";s()}}function s(){localStorage.setItem("td",JSON.stringify(t));r()}r()<\/script><div id=map></div><script src=https://unpkg.com/leaflet@1.9.4/dist/leaflet.js><\/script><script>var pts=__C__;var m=L.map("map");L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"©OSM",maxZoom:19}).addTo(m);function amapUrl(a,b,c){var d=encodeURIComponent(c),u=navigator.userAgent;return/Android/i.test(u)?"intent://navi?sourceApplication="+encodeURIComponent("冰冰出行")+"&poiname="+d+"&lat="+b+"&lon="+a+"&dev=0&style=2#Intent;scheme=androidamap;package=com.autonavi.minimap;S.browser_fallback_url=https%3A%2F%2Furi.amap.com%2Fnavigation%3Fto%3D"+a+"%2C"+b+"%2C"+d+"%26mode%3Dcar;end":/iPhone|iPad|iPod/i.test(u)?"iosamap://path?sourceApplication="+encodeURIComponent("冰冰出行")+"&dname="+d+"&dlat="+b+"&dlon="+a+"&dev=0&t=0":"https://uri.amap.com/navigation?to="+a+","+b+","+d+"&mode=car"}pts.forEach(function(p,i){var n=p.name||"";var pop="<b>"+(i+1)+". "+n+"</b><br>"+(p.time||"")+"<br><a href=geo:"+p.lat+","+p.lng+"?q="+encodeURIComponent(n)+" target=_blank style=display:inline-block;padding:5px 14px;background:#4A90D9;color:#fff;border-radius:6px;text-decoration:none;font-size:12px;margin:4px 4px 0 0>导航</a> <a href="+amapUrl(p.lng,p.lat,n)+" target=_blank style=display:inline-block;padding:5px 14px;background:#FF6B35;color:#fff;border-radius:6px;text-decoration:none;font-size:12px;margin:4px 0 0 0>高德</a>";L.marker([p.lat,p.lng],{icon:L.divIcon({className:"bb-pin",html:"<span>"+(i+1)+"</span>",iconSize:[28,28],iconAnchor:[14,14]})}).addTo(m).bindPopup(pop,{maxWidth:260})});var c=pts.map(function(p){return[p.lat,p.lng]});if(c.length>1)L.polyline(c,{dashArray:"6 8",weight:2,color:"#6C8BF5"}).addTo(m);m.fitBounds(c.length?c:[[0,0]],{padding:[30,30]})<\/script><div class=card><div class=card-h><div class=ic style=background:var(--t);color:white>ℹ</div><h2>行前须知</h2></div><div class=card-b><div class=g2>__PRE__</div></div></div><div class=card><div class=card-h><div class=ic style=background:var(--g);color:white>✈</div><h2>航班推荐 <span style=font-size:.75rem;color:var(--ink3);font-weight:400>待选·请自行核实</span></h2></div><div class=card-b><table>__FL__</table></div></div><div class=card><div class=card-h><div class=ic style=background:var(--t);color:white>🏨</div><h2>酒店推荐 <span style=font-size:.75rem;color:var(--ink3);font-weight:400>按片区+价位</span></h2></div><div class=card-b>__HT__</div></div><div class=disc>⚠️ <strong>免责声明</strong>:本页全部信息(天气、航班、酒店、餐厅、景点、门票、价格等)均为AI基于公开资料整理的参考建议,可能不准确或已过时。请务必在官方渠道核实后再做决定或前往。</div>__IT__<div class=card><div class=card-h><div class=ic style=background:var(--g);color:white>💡</div><h2>全程实用贴士</h2></div><div class=card-b><ul class=tips>__TP__</ul></div></div></div></body></html>';
+
+const TRIP_THEME='<style>:root{--c:#F6FAFF;--w:rgba(255,255,255,.94);--f:#6C8BF5;--f2:#FF8A7A;--t:#FF8A7A;--g:#F8C36A;--ink:#253246;--ink2:#526174;--ink3:#7A8798;--bd:rgba(108,139,245,.14);--sh:0 12px 30px rgba(83,103,140,.11);--sh2:0 18px 44px rgba(83,103,140,.16)}body{background:linear-gradient(125deg,rgba(108,139,245,.10),transparent 28%),linear-gradient(235deg,rgba(255,138,122,.10),transparent 30%),linear-gradient(180deg,#F6FAFF,#FFF8F4 62%,#F5F2FF)}.hero{background:linear-gradient(135deg,#6C8BF5,#FF8A7A)}.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(118deg,transparent 0 28%,rgba(255,255,255,.20) 31%,transparent 36% 62%,rgba(255,255,255,.16) 65%,transparent 70%);animation:tripGlow 10s ease-in-out infinite alternate}.hero::after{background:var(--c)}@keyframes tripGlow{to{transform:translateX(-34px)}}.hero-l,.hero-meta span{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.28)}.card{border:1px solid rgba(108,139,245,.12);box-shadow:var(--sh)}.card:hover{box-shadow:var(--sh2)}.card-h .ic,.check-card .ic{background:linear-gradient(135deg,#6C8BF5,#FF8A7A)!important}.g2>div,.dine,.tag,th{background:rgba(108,139,245,.07)}.slot{border-left-color:#6C8BF5;box-shadow:0 8px 22px rgba(83,103,140,.08)}.slot:hover{transform:translateY(-2px)}.badge{background:rgba(248,195,106,.22);color:#9A6B11}.disc{background:linear-gradient(135deg,rgba(255,138,122,.12),rgba(248,195,106,.16));border-color:rgba(255,138,122,.20);color:#74463F}.bb-pin{background:#6C8BF5!important;box-shadow:0 8px 18px rgba(108,139,245,.22)}a[style*="background:#4A90D9"]{background:#6C8BF5!important}a[style*="background:#FF6B35"]{background:#FF8A7A!important}</style>';
 
 function renderHTML(data){
   let coords=[],itinerary='';
-  const DC=[['#0D9488','#14B8A6'],['#EC4899','#F472B6'],['#F59E0B','#FBBF24'],['#8B5CF6','#A78BFA']];
-  const DB=['#0D9488','#EC4899','#F59E0B','#8B5CF6'];
+  const DC=[['#6C8BF5','#7EB6FF'],['#FF8A7A','#FFB199'],['#F8C36A','#FFE0A3'],['#64C6B7','#96DED4']];
+  const DB=['#6C8BF5','#FF8A7A','#F8C36A','#64C6B7'];
   const w=data.weather||'',fl=data.flights||[],ht=data.hotels||[],it=data.itinerary||[],tp2=data.tips||[];
   
   it.forEach(d=>{d.slots.forEach(s=>{if(s.la&&s.lo)coords.push({lat:s.la,lng:s.lo,name:s.n,time:s.t})})});
@@ -539,7 +584,7 @@ function renderHTML(data){
   
   let tps='';tp2.forEach(t=>{tps+='<li><span>💡</span> '+t+'</li>'});
   
-  return TPL.replace(/{title}/g,data.title).replace(/{dest}/g,data.dest).replace(/{dest_upper}/g,(data.dest||'').toUpperCase()).replace(/{days}/g,data.days).replace(/{d1}/g,data.days-1).replace(/{startDate}/g,data.startDate||'2026年').replace('__PRE__',pre).replace('__FL__',fls).replace('__HT__',hts).replace('__IT__',itinerary).replace('__TP__',tps).replace('__C__',JSON.stringify(coords));
+  return TPL.replace('</head>',TRIP_THEME+'</head>').replace('color:"#6C8BF5"','color:"#6C8BF5"').replace(/{title}/g,data.title).replace(/{dest}/g,data.dest).replace(/{dest_upper}/g,(data.dest||'').toUpperCase()).replace(/{days}/g,data.days).replace(/{d1}/g,data.days-1).replace(/{startDate}/g,data.startDate||'2026年').replace('__PRE__',pre).replace('__FL__',fls).replace('__HT__',hts).replace('__IT__',itinerary).replace('__TP__',tps).replace('__C__',JSON.stringify(coords));
 }
 
 const phaseMsgs=[
@@ -662,7 +707,6 @@ window.addEventListener('pageshow',(e)=>{if(e.persisted){loadPlans();document.ge
 <script>
 if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}
 </script>
-</script>
 <style>
 @keyframes bgD{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 @keyframes bubA{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(25px,-20px) scale(1.06)}66%{transform:translate(-15px,25px) scale(.95)}}
@@ -670,3 +714,271 @@ if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}
 @keyframes bubC{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(20px,30px) scale(1.04)}66%{transform:translate(-20px,-15px) scale(.92)}}
 @keyframes spinG{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 @keyframes shim{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+
+:root{
+  --bg:#F6FAFF;
+  --paper:rgba(255,255,255,.88);
+  --ink:#253246;
+  --ink2:#526174;
+  --muted:#7A8798;
+  --accent:#6C8BF5;
+  --accent-2:#FF8A7A;
+  --accent-3:#F8C36A;
+  --accent-4:#64C6B7;
+  --accent-glow:rgba(108,139,245,.18);
+  --online:#64C6B7;
+  --border:rgba(108,139,245,.16);
+  --border2:rgba(37,50,70,.08);
+  --msg-user:linear-gradient(135deg,#6C8BF5,#7EB6FF);
+  --msg-ai:rgba(255,255,255,.92);
+  --glass:rgba(255,255,255,.68);
+  --glass-border:rgba(255,255,255,.76);
+  --glass-shadow:0 18px 50px rgba(88,111,156,.16),0 1px 0 rgba(255,255,255,.82),inset 0 1px 0 rgba(255,255,255,.68);
+  --shadow-sm:0 8px 24px rgba(83,103,140,.10);
+  --shadow-md:0 16px 36px rgba(83,103,140,.14);
+}
+body{
+  background:
+    linear-gradient(125deg,rgba(108,139,245,.12) 0%,transparent 26%),
+    linear-gradient(235deg,rgba(255,138,122,.12) 0%,transparent 30%),
+    linear-gradient(180deg,#F6FAFF 0%,#FFF8F4 54%,#F5F2FF 100%);
+}
+body::before{
+  content:"";position:fixed;inset:-18%;z-index:-2;pointer-events:none;
+  background:
+    linear-gradient(118deg,transparent 0 18%,rgba(108,139,245,.16) 24%,transparent 32%),
+    linear-gradient(142deg,transparent 0 46%,rgba(255,138,122,.14) 52%,transparent 62%),
+    linear-gradient(96deg,transparent 0 64%,rgba(100,198,183,.12) 70%,transparent 78%);
+  background-size:140% 140%;
+  animation:warmFlow 18s ease-in-out infinite alternate;
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(108,139,245,.08) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(108,139,245,.06) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.34),transparent 82%);
+}
+@keyframes warmFlow{to{transform:translate3d(-36px,22px,0) scale(1.05);background-position:80% 48%}}
+
+.fx-stage{z-index:0;opacity:.9}
+.fx-orbit{
+  width:min(78vw,520px);height:180px;right:-70px;top:92px;border:0;border-radius:0;
+  background:
+    linear-gradient(104deg,transparent 0 12%,rgba(108,139,245,.18) 12.5% 13.5%,transparent 14% 42%,rgba(255,138,122,.18) 42.5% 43.5%,transparent 44%),
+    repeating-linear-gradient(24deg,transparent 0 28px,rgba(37,50,70,.05) 29px 30px);
+  clip-path:polygon(0 36%,18% 22%,42% 48%,64% 28%,100% 40%,100% 100%,0 100%);
+  animation:routeDrift 12s ease-in-out infinite alternate;
+}
+.fx-orbit::before,.fx-orbit::after{
+  width:12px;height:12px;border:3px solid #fff;border-radius:50%;box-shadow:0 10px 22px rgba(108,139,245,.24);
+}
+.fx-orbit::before{left:18%;top:34%;background:var(--accent-2)}
+.fx-orbit::after{right:16%;bottom:46%;background:var(--accent)}
+.fx-line{
+  left:7%;right:7%;top:45%;height:2px;border-radius:999px;
+  background:linear-gradient(90deg,transparent,rgba(108,139,245,.34),rgba(255,138,122,.24),transparent);
+  transform:rotate(-6deg);animation:scanLine 8s ease-in-out infinite;
+}
+@keyframes routeDrift{50%{transform:translate3d(-18px,10px,0)}}
+@keyframes scanLine{0%,100%{opacity:.24;transform:translateY(-10px) rotate(-6deg)}50%{opacity:.7;transform:translateY(14px) rotate(-6deg)}}
+
+.splash{
+  background:
+    linear-gradient(130deg,rgba(108,139,245,.18),transparent 32%),
+    linear-gradient(250deg,rgba(255,138,122,.18),transparent 34%),
+    linear-gradient(180deg,#F6FAFF,#FFF8F4 62%,#F5F2FF);
+  isolation:isolate;
+  --spx:0px;
+  --spy:0px;
+  --panelx:0px;
+  --panely:0px;
+}
+.splash::before{
+  content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(circle at 20% 18%,rgba(255,233,214,.36),transparent 28%),
+    radial-gradient(circle at 82% 28%,rgba(255,166,137,.22),transparent 34%),
+    linear-gradient(180deg,rgba(255,250,244,.16),rgba(255,232,217,.34) 64%,rgba(255,247,238,.58));
+}
+.splash-photos{position:absolute;inset:-4%;z-index:0;overflow:hidden;transform:translate3d(var(--spx),var(--spy),0) scale(1.03);transition:transform .24s ease-out;contain:paint}
+.splash-photos::before{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(circle at 38% 30%,rgba(255,255,255,.16),transparent 24%),radial-gradient(circle at 70% 54%,rgba(255,205,174,.22),transparent 36%);pointer-events:none}
+.splash-photos::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(115deg,rgba(255,224,197,.22),rgba(255,255,255,.08) 42%,rgba(255,138,122,.16));mix-blend-mode:screen;pointer-events:none}
+.splash-photos .photo{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center;opacity:.96;transform:scale(1.035);transition:opacity .22s ease;image-rendering:auto;will-change:opacity}
+.splash-photos.releasing,.splash-photos.releasing .photo{background:none!important;opacity:0!important;transition:none!important;animation:none!important}
+.splash-grid{
+  z-index:2;
+  background-image:
+    linear-gradient(rgba(108,139,245,.08) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(108,139,245,.06) 1px,transparent 1px);
+  mask-image:linear-gradient(to bottom,#000,transparent 86%);
+}
+.splash-orbit{
+  z-index:2;
+  width:min(88vw,520px);aspect-ratio:1.58;border:0;border-radius:0;
+  background:linear-gradient(120deg,transparent 0 22%,rgba(108,139,245,.18) 23%,transparent 25% 54%,rgba(255,138,122,.17) 55%,transparent 57%);
+  animation:mapPan 16s ease-in-out infinite alternate;
+}
+.splash-orbit span{background:var(--accent);box-shadow:0 0 0 7px rgba(108,139,245,.12),0 14px 28px rgba(108,139,245,.18)}
+.splash-orbit span:nth-child(2){background:var(--accent-2);box-shadow:0 0 0 7px rgba(255,138,122,.12),0 14px 28px rgba(255,138,122,.18)}
+.splash-orbit span:nth-child(3){background:var(--accent-4);box-shadow:0 0 0 7px rgba(100,198,183,.12),0 14px 28px rgba(100,198,183,.18)}
+@keyframes mapPan{to{transform:translate3d(-18px,10px,0)}}
+.splash-panel{
+  z-index:3;
+  border:1px solid rgba(255,255,255,.58);
+  background:linear-gradient(145deg,rgba(255,255,255,.46),rgba(255,255,255,.24) 58%,rgba(255,237,226,.20));
+  color:var(--ink);
+  backdrop-filter:saturate(1.12) blur(12px);
+  -webkit-backdrop-filter:saturate(1.12) blur(12px);
+  box-shadow:0 24px 72px rgba(80,92,120,.20),0 10px 26px rgba(255,138,122,.10),inset 0 1px 0 rgba(255,255,255,.70);
+  transform:translate3d(var(--panelx),var(--panely),0);
+  transition:transform .24s ease-out;
+}
+.brand-mark{background:linear-gradient(135deg,#6C8BF5,#FF8A7A)!important;box-shadow:0 18px 44px rgba(108,139,245,.22)!important}
+.brand-mark i{border-color:#fff!important}.brand-mark i::before,.brand-mark i::after{background:#fff!important;box-shadow:8px 6px 0 -1px #fff!important}
+.splash-kicker{color:var(--accent);font-weight:800;text-shadow:0 1px 16px rgba(255,255,255,.70)}.splash-panel h1{color:var(--ink);text-shadow:0 2px 20px rgba(255,255,255,.76)}
+.splash-copy{color:#435064;text-shadow:0 1px 12px rgba(255,255,255,.68)}
+.splash-status span{border-color:rgba(255,255,255,.48);color:#435064;background:rgba(255,255,255,.24)}
+.splash-scenes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:0 0 14px}
+.splash-scenes button{border:1px solid rgba(255,255,255,.44);border-radius:14px;background:rgba(255,255,255,.32);color:#465469;height:36px;font-size:11px;font-weight:800;font-family:var(--font-body);cursor:pointer;transition:transform .18s,background .18s,color .18s,box-shadow .18s,border-color .18s}
+.splash-scenes button.on{background:linear-gradient(135deg,rgba(108,139,245,.94),rgba(255,138,122,.92));border-color:rgba(255,255,255,.24);color:#fff;box-shadow:0 12px 30px rgba(255,138,122,.24)}
+.splash-scenes button:active{transform:scale(.96)}
+.splash-enter{background:linear-gradient(135deg,rgba(108,139,245,.96),rgba(255,138,122,.94));color:#fff;box-shadow:0 16px 40px rgba(108,139,245,.24),0 10px 24px rgba(255,138,122,.16)}
+
+body.workspace-ready::before{animation:none!important;opacity:.32}
+body.workspace-ready .fx-stage{display:none!important}
+body.workspace-ready .home-hero::before,
+body.workspace-ready .home-hero::after,
+body.workspace-ready .hero-device,
+body.workspace-ready .route-svg,
+body.workspace-ready .preview-stage::before,
+body.workspace-ready .preview-dot{animation:none!important}
+body.workspace-ready .tb,
+body.workspace-ready .bnav{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(255,255,255,.90)!important}
+
+.tb,.bnav{background:var(--glass)!important;border-color:var(--glass-border)!important;box-shadow:var(--glass-shadow)!important}
+.tb{backdrop-filter:saturate(1.2) blur(14px);-webkit-backdrop-filter:saturate(1.2) blur(14px)}
+.tb-l span{color:var(--ink)!important}.tb-install,.tb-btn{background:rgba(255,255,255,.72)!important;border-color:rgba(108,139,245,.16)!important;color:var(--ink2)!important}
+.tb-install{color:var(--accent)!important}.tb-btn:active,.tb-install:active{background:rgba(108,139,245,.10)!important;color:var(--accent)!important}
+#tbAcctBtn{background:rgba(255,255,255,.76);color:var(--accent)}
+
+.home-hero{
+  border-color:rgba(255,255,255,.78);background:
+    linear-gradient(135deg,rgba(255,255,255,.86),rgba(255,255,255,.54)),
+    linear-gradient(120deg,rgba(108,139,245,.14),rgba(255,138,122,.10));
+  box-shadow:var(--glass-shadow);
+}
+.home-hero::before{
+  background:linear-gradient(110deg,rgba(108,139,245,.16),transparent 36%,rgba(255,138,122,.13),transparent 72%);
+}
+.home-hero::after{
+  border-radius:30px;background:linear-gradient(135deg,rgba(108,139,245,.12),rgba(248,195,106,.13));filter:none;
+}
+.hero-kicker{color:var(--accent);border-color:rgba(108,139,245,.18);background:rgba(108,139,245,.08);font-weight:800}
+.home-hero h1{color:var(--ink);letter-spacing:-.02em}
+.home-hero p{color:var(--ink2)}
+.hero-actions button,.ptop button.accent,.auth-box .actions .primary,.install-box .actions .primary,.sa .bsave,.sbtn,.brief-chip.on{
+  background:linear-gradient(135deg,#6C8BF5,#FF8A7A)!important;color:#fff!important;box-shadow:0 14px 32px rgba(108,139,245,.22)!important;
+}
+.hero-device{background:rgba(255,255,255,.82);border-color:rgba(108,139,245,.16);box-shadow:0 22px 58px rgba(108,139,245,.18)}
+.device-map{background:linear-gradient(145deg,rgba(108,139,245,.12),rgba(255,138,122,.09)),repeating-linear-gradient(60deg,rgba(37,50,70,.08) 0 1px,transparent 1px 20px)}
+.device-map span,.preview-dot{background:var(--accent);box-shadow:0 0 0 7px rgba(108,139,245,.12)}
+.device-map .p2,.preview-dot.d2{background:var(--accent-2)}.device-map .p3,.preview-dot.d3{background:var(--accent-4)}
+.route-svg{stroke:rgba(108,139,245,.7)}
+
+.msg{border-color:rgba(108,139,245,.10);box-shadow:var(--shadow-sm)}
+.msg.a{background:rgba(255,255,255,.92);color:var(--ink)}
+.msg.u{color:#fff}
+.msg.s{box-shadow:none}
+.msg .fill,.msg .progress-wrap .bar-wrap .fill,.meter-fill{background:linear-gradient(90deg,#6C8BF5,#FF8A7A)!important}
+.msg .status-text{color:var(--accent)}
+.chat-inp{
+  background:rgba(255,255,255,.82);border-color:rgba(255,255,255,.78);box-shadow:var(--glass-shadow);
+}
+.chat-row textarea{background:rgba(255,255,255,.9);border-color:rgba(108,139,245,.14);color:var(--ink)}
+.chat-row textarea:focus{border-color:rgba(108,139,245,.42);box-shadow:0 0 0 4px rgba(108,139,245,.12)}
+.chat-row textarea::placeholder{color:#8B98AA}
+.ic-send::after{background:rgba(255,255,255,.92)!important}
+.ic-leaf::before{content:"";position:absolute;left:4px;top:3px;width:10px;height:12px;border:1.8px solid currentColor;border-radius:10px 10px 10px 2px;transform:rotate(32deg)}.ic-leaf::after{content:"";position:absolute;left:8px;top:8px;width:7px;height:1.6px;background:currentColor;transform:rotate(-28deg)}
+.ic-dine::before{content:"";position:absolute;left:3px;top:2px;width:2px;height:14px;background:currentColor;box-shadow:4px 0 0 currentColor}.ic-dine::after{content:"";position:absolute;right:3px;top:2px;width:5px;height:14px;border:1.8px solid currentColor;border-top:0;border-bottom:0;border-right:0;border-radius:0 0 5px 5px}
+.ic-family::before{content:"";position:absolute;left:3px;top:4px;width:5px;height:5px;border:1.7px solid currentColor;border-radius:50%;box-shadow:8px -2px 0 -1.7px currentColor,8px -2px 0 0 currentColor}.ic-family::after{content:"";position:absolute;left:2px;bottom:2px;width:14px;height:7px;border:1.7px solid currentColor;border-radius:9px 9px 3px 3px}
+.ic-heart::before,.ic-heart::after{content:"";position:absolute;left:8px;top:3px;width:7px;height:11px;background:currentColor;border-radius:7px 7px 0 0;transform:rotate(-45deg);transform-origin:0 100%}.ic-heart::after{left:1px;transform:rotate(45deg);transform-origin:100% 100%}
+.ic-spark::before{content:"";position:absolute;left:8px;top:1px;width:2px;height:16px;background:currentColor;border-radius:2px}.ic-spark::after{content:"";position:absolute;left:1px;top:8px;width:16px;height:2px;background:currentColor;border-radius:2px;transform:rotate(45deg)}
+.ic-compose::before{content:"";position:absolute;left:3px;top:3px;width:12px;height:12px;border:1.8px solid currentColor;border-radius:3px}.ic-compose::after{content:"";position:absolute;left:7px;top:8px;width:8px;height:2px;background:currentColor;transform:rotate(-38deg);box-shadow:0 4px 0 -1px currentColor}
+.ic-focus::before{content:"";position:absolute;left:2px;top:2px;width:5px;height:5px;border-top:1.8px solid currentColor;border-left:1.8px solid currentColor;box-shadow:9px 0 0 -1px currentColor,9px 9px 0 -1px currentColor,0 9px 0 -1px currentColor}.ic-focus::after{content:"";position:absolute;left:7px;top:7px;width:4px;height:4px;background:currentColor;border-radius:50%}
+.ic-clear::before{content:"";position:absolute;left:3px;top:8px;width:12px;height:2px;background:currentColor;transform:rotate(45deg);border-radius:2px}.ic-clear::after{content:"";position:absolute;left:3px;top:8px;width:12px;height:2px;background:currentColor;transform:rotate(-45deg);border-radius:2px}
+.ic-back::before{content:"";position:absolute;left:3px;top:8px;width:12px;height:2px;background:currentColor;border-radius:2px}.ic-back::after{content:"";position:absolute;left:3px;top:5px;width:7px;height:7px;border-left:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg)}
+.ic-copy::before{content:"";position:absolute;left:6px;top:3px;width:9px;height:11px;border:1.7px solid currentColor;border-radius:3px}.ic-copy::after{content:"";position:absolute;left:3px;top:6px;width:9px;height:11px;border:1.7px solid currentColor;border-radius:3px;background:rgba(255,255,255,.45)}
+.ic-open::before{content:"";position:absolute;left:3px;top:6px;width:10px;height:9px;border:1.8px solid currentColor;border-radius:3px}.ic-open::after{content:"";position:absolute;right:2px;top:2px;width:8px;height:8px;border-top:1.8px solid currentColor;border-right:1.8px solid currentColor}
+.ic-edit::before{content:"";position:absolute;left:3px;bottom:3px;width:12px;height:3px;border-bottom:1.8px solid currentColor}.ic-edit::after{content:"";position:absolute;left:6px;top:3px;width:9px;height:3px;background:currentColor;border-radius:3px;transform:rotate(-42deg)}
+.ic-trash::before{content:"";position:absolute;left:5px;top:6px;width:8px;height:10px;border:1.8px solid currentColor;border-top:0;border-radius:0 0 3px 3px}.ic-trash::after{content:"";position:absolute;left:4px;top:3px;width:10px;height:2px;background:currentColor;border-radius:2px;box-shadow:3px -2px 0 -1px currentColor}
+.ic-plus::before{content:"";position:absolute;left:3px;top:8px;width:12px;height:2px;background:currentColor;border-radius:2px}.ic-plus::after{content:"";position:absolute;left:8px;top:3px;width:2px;height:12px;background:currentColor;border-radius:2px}
+.composer-top{display:flex;align-items:center;justify-content:space-between;margin:0 2px 9px;color:var(--ink);font-size:12px;font-weight:800}
+.composer-hint{font-size:10px;color:var(--muted);font-weight:700}
+.composer-brief{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.brief-chip{display:flex;align-items:center;justify-content:center;gap:6px;text-align:center;font-weight:800;min-height:38px}
+.brief-chip .line-ic{width:15px;height:15px;flex:0 0 15px}
+.dialog-tools{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:11px 0 0}
+.tool-chip{display:flex;align-items:center;justify-content:center;gap:6px;min-height:38px}.tool-chip .line-ic{width:16px;height:16px;flex:0 0 16px}
+.brief-chip,.tool-chip,.chip{background:rgba(255,255,255,.7);border-color:rgba(108,139,245,.14);color:var(--ink2)}
+.tool-chip{color:var(--accent);font-weight:800}.tool-chip:active,.chip:active{background:rgba(108,139,245,.11);color:var(--accent)}
+.prompt-meter{color:var(--muted)}
+.meter-bar{background:rgba(108,139,245,.10)}
+
+.pempty{color:var(--muted)}
+.preview-stage{background:rgba(255,255,255,.76);border-color:rgba(255,255,255,.78);box-shadow:var(--glass-shadow)}
+.preview-stage::before{border-color:rgba(108,139,245,.24)}
+.preview-card-mini{background:rgba(255,255,255,.86);border-color:rgba(108,139,245,.13);color:var(--ink);box-shadow:var(--shadow-sm)}
+.preview-card-mini span{color:var(--muted)}
+.ptop,.plans-head{background:rgba(255,255,255,.76);border-color:rgba(108,139,245,.12);box-shadow:var(--shadow-sm)}
+.ptop{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:8px}
+.preview-actions{display:flex;align-items:center;gap:7px}
+.ptop button,.plans-actions button{display:inline-flex;align-items:center;justify-content:center;gap:5px;background:rgba(255,255,255,.78);border-color:rgba(108,139,245,.14);color:var(--ink2)}
+.ptop button .line-ic,.plans-actions button .line-ic{width:15px;height:15px}
+.ptop .url{color:var(--muted)}.plans-head h3{color:var(--ink)}
+.plans-title{display:flex;flex-direction:column;gap:1px}.plans-title p{font-size:11px;color:var(--muted);margin:0}
+.plans-actions button{color:var(--accent)}.plans-actions button.danger{background:rgba(232,74,95,.08);color:#E84A5F}
+#vPlans,#pList,.about{background:transparent}.pcard,.about .tips,.about .step{background:rgba(255,255,255,.82);border-color:rgba(108,139,245,.12);color:var(--ink);box-shadow:var(--shadow-sm)}
+.pcard .pt,.about .tips li,.about .tips h4{color:var(--ink)}.pcard .pm{color:var(--muted)}
+.about .hero{background:linear-gradient(135deg,#6C8BF5,#FF8A7A);border-color:rgba(255,255,255,.52);box-shadow:var(--glass-shadow)}
+
+.bnav{gap:6px;background:rgba(255,255,255,.78)!important}
+.bnav button{color:var(--muted);border-radius:17px}
+.bnav button.on{background:rgba(108,139,245,.12);color:var(--accent);box-shadow:inset 0 0 0 1px rgba(108,139,245,.18)}
+.bnav button .ni.line-ic{opacity:.72}.bnav button.on .ni.line-ic{opacity:1}
+
+.install-modal,.auth-overlay,.acct-panel,.so{background:rgba(42,54,76,.28);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.install-box,.auth-box,.acct-box,.sm{
+  background:rgba(255,255,255,.92)!important;border-color:rgba(255,255,255,.76)!important;color:var(--ink)!important;box-shadow:0 28px 76px rgba(72,89,128,.22)!important;
+}
+.auth-box .logo h2,.sm h3,.acct-box .head .info h3,.install-box h3{color:var(--ink)!important}
+.auth-box .field label,.sf label,.acct-box .card h4{color:var(--ink2)}
+.auth-box .field input,.auth-box .field select,.sf input,.acct-box .card input,#actionInput{
+  background:rgba(255,255,255,.92)!important;border-color:rgba(108,139,245,.16)!important;color:var(--ink)!important;box-shadow:0 8px 22px rgba(83,103,140,.08)!important;
+}
+.auth-box .actions .secondary,.install-box .actions .secondary,.btest,.bcancel{background:rgba(255,255,255,.56)!important;color:var(--ink2)!important;border-color:rgba(108,139,245,.14)!important}
+.acct-box .head .avatar{background:linear-gradient(135deg,#6C8BF5,#FF8A7A)!important;color:#fff!important}
+.acct-box .card{background:rgba(246,250,255,.82);border-color:rgba(108,139,245,.12)}
+.toast{background:#253246;box-shadow:0 16px 36px rgba(37,50,70,.22)}
+
+@media(hover:hover){
+  .tb-btn:hover,.tb-install:hover,.tool-chip:hover,.chip:hover,.ptop button:hover,.plans-actions button:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(108,139,245,.12)}
+  .hero-actions button:hover,.sbtn:hover,.splash-enter:hover{transform:translateY(-1px)}
+  .pcard:hover,.about .step:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
+}
+@media(max-width:430px){
+  .home-hero{min-height:212px}.home-hero h1{font-size:25px}.home-hero p{color:#526174}
+  .hero-device{opacity:.72}.chat-inp{border-radius:22px}
+  .splash-panel{width:min(88vw,360px);padding:24px 18px 22px}.splash-scenes{grid-template-columns:1fr;gap:6px}.splash-scenes button{height:32px}.splash-status{gap:6px}.splash-status span{font-size:10px;padding:7px 4px}
+  .composer-brief{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ptop{grid-template-columns:1fr;align-items:stretch}.preview-actions{display:grid;grid-template-columns:repeat(3,1fr)}.ptop .url{order:-1;text-align:center}
+  .dialog-tools{grid-template-columns:repeat(4,1fr)}.tool-chip{gap:4px}.tool-chip .line-ic{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .splash-photos .photo,.splash-orbit,.home-hero::after{animation:none!important}
+  .splash-photos .photo{opacity:.96}
+}
+</style>
+</body>
+</html>

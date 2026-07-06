@@ -10,6 +10,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import crypto from 'crypto';
+import net from 'net';
+import tls from 'tls';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3001;
@@ -35,6 +37,7 @@ const configuredOrigins = new Set([
     .filter(Boolean),
 ]);
 const netlifyOriginPattern = /^https:\/\/[a-z0-9-]+\.netlify\.app$/i;
+const cloudflareOriginPattern = /^https:\/\/([a-z0-9-]+\.)*[a-z0-9-]+\.(pages|workers)\.dev$/i;
 
 function resolveJwtSecret() {
   const configuredSecret = process.env.JWT_SECRET || '';
@@ -116,7 +119,7 @@ app.use(cors({
   credentials: true,
   origin(origin, callback) {
     if (!origin) return callback(null, true);
-    if (configuredOrigins.has(origin) || netlifyOriginPattern.test(origin)) {
+    if (configuredOrigins.has(origin) || netlifyOriginPattern.test(origin) || cloudflareOriginPattern.test(origin)) {
       return callback(null, true);
     }
     return callback(new Error('CORS origin blocked'));
@@ -347,6 +350,126 @@ function generateCode() {
   return String(crypto.randomInt(100000, 1000000));
 }
 
+function hasSmtpConfig() {
+  return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+}
+
+async function sendVerificationEmail(to, code) {
+  const port = Number(process.env.SMTP_PORT || 465);
+  const host = process.env.SMTP_HOST;
+  const secure = String(process.env.SMTP_SECURE || '').toLowerCase() === 'false' ? false : port === 465;
+  const from = process.env.SMTP_FROM || process.env.SMTP_USER;
+  const fromAddress = extractEmailAddress(from);
+  const socket = await connectSmtp({ host, port, secure });
+  try {
+    await expectSmtp(socket, [220]);
+    await smtpCommand(socket, `EHLO ${process.env.SMTP_EHLO_HOST || 'bingbing-travel.local'}`, [250]);
+    await smtpCommand(socket, 'AUTH LOGIN', [334]);
+    await smtpCommand(socket, Buffer.from(process.env.SMTP_USER).toString('base64'), [334]);
+    await smtpCommand(socket, Buffer.from(process.env.SMTP_PASS).toString('base64'), [235]);
+    await smtpCommand(socket, `MAIL FROM:<${fromAddress}>`, [250]);
+    await smtpCommand(socket, `RCPT TO:<${to}>`, [250, 251]);
+    await smtpCommand(socket, 'DATA', [354]);
+    await smtpCommand(socket, buildVerificationEmail({ from, to, code }), [250], true);
+    await smtpCommand(socket, 'QUIT', [221]);
+  } finally {
+    socket.end();
+  }
+}
+
+function extractEmailAddress(value) {
+  const match = String(value || '').match(/<([^>]+)>/);
+  return (match ? match[1] : value || '').trim();
+}
+
+function encodeHeader(value) {
+  return '=?UTF-8?B?' + Buffer.from(String(value), 'utf8').toString('base64') + '?=';
+}
+
+function buildVerificationEmail({ from, to, code }) {
+  const boundary = 'bb-' + crypto.randomBytes(8).toString('hex');
+  const subject = encodeHeader('冰冰出行密码重置验证码');
+  const text = `你的冰冰出行验证码是：${code}。验证码10分钟内有效。如非本人操作，请忽略本邮件。`;
+  const html = `<div style="font-family:Arial,'Microsoft YaHei',sans-serif;line-height:1.7;color:#253246"><h2>冰冰出行验证码</h2><p>你的验证码是：</p><p style="font-size:28px;font-weight:700;letter-spacing:4px;color:#6C8BF5">${code}</p><p>验证码10分钟内有效。如非本人操作，请忽略本邮件。</p></div>`;
+  return [
+    `From: ${from}`,
+    `To: ${to}`,
+    `Subject: ${subject}`,
+    'MIME-Version: 1.0',
+    `Content-Type: multipart/alternative; boundary="${boundary}"`,
+    '',
+    `--${boundary}`,
+    'Content-Type: text/plain; charset=UTF-8',
+    'Content-Transfer-Encoding: 8bit',
+    '',
+    text,
+    `--${boundary}`,
+    'Content-Type: text/html; charset=UTF-8',
+    'Content-Transfer-Encoding: 8bit',
+    '',
+    html,
+    `--${boundary}--`,
+    '.',
+  ].join('\r\n');
+}
+
+function connectSmtp({ host, port, secure }) {
+  return new Promise((resolve, reject) => {
+    const socket = secure
+      ? tls.connect({ host, port, servername: host, rejectUnauthorized: process.env.SMTP_REJECT_UNAUTHORIZED !== 'false' })
+      : net.connect({ host, port });
+    const timer = setTimeout(() => {
+      socket.destroy();
+      reject(new Error('SMTP connection timed out'));
+    }, 15000);
+    socket.once('error', (err) => {
+      clearTimeout(timer);
+      reject(err);
+    });
+    socket.once(secure ? 'secureConnect' : 'connect', () => {
+      clearTimeout(timer);
+      socket.setEncoding('utf8');
+      resolve(socket);
+    });
+  });
+}
+
+function expectSmtp(socket, expectedCodes) {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error('SMTP response timed out'));
+    }, 15000);
+    const onData = (chunk) => {
+      data += chunk;
+      const lines = data.split(/\r?\n/).filter(Boolean);
+      const last = lines[lines.length - 1] || '';
+      if (!/^\d{3} /.test(last)) return;
+      const code = Number(last.slice(0, 3));
+      cleanup();
+      if (expectedCodes.includes(code)) resolve(data);
+      else reject(new Error('Unexpected SMTP response ' + data.trim()));
+    };
+    const onError = (err) => {
+      cleanup();
+      reject(err);
+    };
+    const cleanup = () => {
+      clearTimeout(timer);
+      socket.off('data', onData);
+      socket.off('error', onError);
+    };
+    socket.on('data', onData);
+    socket.once('error', onError);
+  });
+}
+
+function smtpCommand(socket, command, expectedCodes, raw = false) {
+  socket.write(raw ? command + '\r\n' : command + '\r\n');
+  return expectSmtp(socket, expectedCodes);
+}
+
 // Clean expired codes every 5 minutes
 setInterval(() => {
   const now = Date.now();
@@ -359,7 +482,7 @@ setInterval(() => {
 app.post('/api/auth/forgot-password', authLimiter, [
   body('username').isString().trim().matches(USERNAME_RE).withMessage('用户名格式不正确'),
   body('qqEmail').isString().trim().matches(QQ_EMAIL_RE).withMessage('请输入正确的QQ邮箱'),
-], (req, res) => {
+], async (req, res) => {
   if (!validateRequest(req, res)) return;
   try {
     const username = normalizeUsername(req.body.username);
@@ -382,13 +505,23 @@ app.post('/api/auth/forgot-password', authLimiter, [
     const code = generateCode();
     verificationCodes.set(username, { code, expires: Date.now() + 600000, requests: (existing?.requests || 0) + 1, failures: 0 });
 
-    // Try to send email via SMTP, but don't block the response
-    if (process.env.SMTP_HOST) {
-      // SMTP sending would go here.
-      res.json({ message: '验证码已发送到QQ邮箱', ...(isProduction ? {} : { devCode: code }) });
-    } else {
-      res.json({ message: isProduction ? '验证码服务暂未配置，请联系管理员' : '验证码已生成', ...(isProduction ? {} : { devCode: code, note: 'SMTP未配置，验证码直接显示' }) });
+    if (hasSmtpConfig()) {
+      try {
+        await sendVerificationEmail(qqEmail, code);
+        return res.json({ message: '验证码已发送到QQ邮箱', ...(isProduction ? {} : { devCode: code }) });
+      } catch (mailErr) {
+        verificationCodes.delete(username);
+        console.error('Verification email error:', mailErr);
+        return res.status(502).json({ error: '验证码邮件发送失败，请稍后重试或检查邮箱服务配置' });
+      }
     }
+
+    if (isProduction) {
+      verificationCodes.delete(username);
+      return res.status(503).json({ error: '验证码邮件服务未配置，请联系管理员' });
+    }
+
+    res.json({ message: '验证码已生成', devCode: code, note: 'SMTP未配置，验证码直接显示' });
   } catch (err) {
     console.error('Forgot password error:', err);
     res.status(500).json({ error: '服务器错误' });
