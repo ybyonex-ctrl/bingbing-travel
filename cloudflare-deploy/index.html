@@ -324,7 +324,7 @@ body.focus-chat .chat-hist{padding-top:10px}
 <div class="fx-stage" aria-hidden="true"><div class="fx-orbit"></div><div class="fx-line"></div></div>
 <div id="sp" class="splash">
   <div class="splash-photos" aria-hidden="true">
-    <span class="photo" data-photo="sea" style="background-image:url('assets/splash-sea.jpg?v=perf2')"></span>
+    <span class="photo" data-photo="sea" style="background-image:url('https://raw.githubusercontent.com/ybyonex-ctrl/bingbing-travel/main/cloudflare-deploy/assets/splash-sea.jpg?v=perf3')"></span>
   </div>
   <div class="splash-grid"></div>
   <div class="splash-orbit"><span></span><span></span><span></span></div>
@@ -504,7 +504,7 @@ function showSet(){document.getElementById('cfgKey').value=gk();document.getElem
 function hideSet(){document.getElementById('so').classList.remove('on')}
 function saveSet(){localStorage.setItem('bb_key',document.getElementById('cfgKey').value.trim());localStorage.setItem('bb_model',document.getElementById('cfgModel').value.trim());toast('已保存');hideSet()}
 async function testApi(){const k=document.getElementById('cfgKey').value.trim();if(!k)return toast('请填Key','e');toast('测试中...');try{await postJSON(API_BASE+'/api/ai/chat',{apiKey:k,model:document.getElementById('cfgModel').value.trim()||'deepseek-chat',messages:[{role:'user',content:'hi'}],max_tokens:5},authToken);toast('连接成功')}catch(e){toast(e.message,'e')}}
-const splashPhotoUrls={sea:'assets/splash-sea.jpg?v=perf2',city:'assets/splash-city.jpg?v=perf2',road:'assets/splash-road.jpg?v=perf2'};
+const splashPhotoUrls={sea:'https://raw.githubusercontent.com/ybyonex-ctrl/bingbing-travel/main/cloudflare-deploy/assets/splash-sea.jpg?v=perf3',city:'https://raw.githubusercontent.com/ybyonex-ctrl/bingbing-travel/main/cloudflare-deploy/assets/splash-city.jpg?v=perf3',road:'https://raw.githubusercontent.com/ybyonex-ctrl/bingbing-travel/main/cloudflare-deploy/assets/splash-road.jpg?v=perf3'};
 let splashCleanup=function(){};
 function setSplashScene(sp,scene){const photo=sp.querySelector('.splash-photos .photo'),url=splashPhotoUrls[scene]||splashPhotoUrls.sea;if(!photo||photo.dataset.photo===scene)return;photo.style.opacity='0';window.setTimeout(()=>{if(!document.body.contains(photo))return;photo.style.backgroundImage='url("'+url+'")';photo.dataset.photo=scene;photo.style.opacity='.97'},120)}
 function releaseSplashAssets(sp){splashCleanup();if(!sp)return;sp.querySelectorAll('.photo').forEach(photo=>{photo.style.animation='none';photo.style.transition='none';photo.style.opacity='0';photo.style.backgroundImage='none'});const photos=sp.querySelector('.splash-photos');if(photos){photos.classList.add('releasing');photos.textContent=''}sp.querySelectorAll('.splash-orbit,.splash-grid').forEach(n=>n.remove())}
