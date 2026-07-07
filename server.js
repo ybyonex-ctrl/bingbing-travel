@@ -23,7 +23,12 @@ const STATIC_DIR = path.resolve(process.env.STATIC_DIR || path.join(__dirname, '
 const USERNAME_RE = /^[\p{L}\p{N}_-]{3,30}$/u;
 const QQ_EMAIL_RE = /^\d{5,12}@qq\.com$/;
 const DEEPSEEK_KEY_RE = /^sk-[A-Za-z0-9_-]{20,200}$/;
-const ALLOWED_MODELS = new Set(['deepseek-chat', 'deepseek-reasoner', 'deepseek-v4-pro']);
+const DEEPSEEK_API_BASE = String(process.env.DEEPSEEK_API_BASE || 'https://api.deepseek.com').replace(/\/+$/, '');
+const DEEPSEEK_MODELS_URL = `${DEEPSEEK_API_BASE}/models`;
+const DEEPSEEK_CHAT_URL = `${DEEPSEEK_API_BASE}/chat/completions`;
+const ALLOWED_MODELS = new Set(['deepseek-v4-flash', 'deepseek-v4-pro', 'deepseek-chat', 'deepseek-reasoner']);
+const DEEPSEEK_MODELS_TIMEOUT_MS = parseDurationMs(process.env.DEEPSEEK_MODELS_TIMEOUT_MS, 20000, 5000, 60000);
+const DEEPSEEK_CHAT_TIMEOUT_MS = parseDurationMs(process.env.DEEPSEEK_CHAT_TIMEOUT_MS, 180000, 60000, 300000);
 const DEFAULT_ALLOWED_ORIGINS = [
   'http://localhost:8787',
   'http://127.0.0.1:8787',
@@ -51,6 +56,12 @@ const configuredOrigins = new Set([
 ]);
 const netlifyOriginPattern = /^https:\/\/[a-z0-9-]+\.netlify\.app$/i;
 const cloudflareOriginPattern = /^https:\/\/([a-z0-9-]+\.)*[a-z0-9-]+\.(pages|workers)\.dev$/i;
+
+function parseDurationMs(value, fallback, min, max) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, Math.round(n)));
+}
 
 function isAllowedOrigin(origin) {
   if (!origin) return true;
@@ -265,14 +276,55 @@ function normalizeMessages(messages) {
   return clean;
 }
 
-async function fetchWithTimeout(url, options, timeoutMs = 30000) {
+async function fetchTextWithTimeout(url, options, timeoutMs = 30000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(url, { ...options, signal: controller.signal });
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    const text = await response.text();
+    return { response, text };
   } finally {
     clearTimeout(timer);
   }
+}
+
+function normalizeDeepSeekModel(model) {
+  if (model === 'deepseek-chat') {
+    return { model: 'deepseek-v4-flash', thinking: { type: 'disabled' } };
+  }
+  if (model === 'deepseek-reasoner') {
+    return { model: 'deepseek-v4-flash', thinking: { type: 'enabled' }, reasoning_effort: 'high' };
+  }
+  return { model, thinking: { type: 'disabled' } };
+}
+
+function deepSeekErrorMessage(status, text) {
+  let payload;
+  try {
+    payload = JSON.parse(text);
+  } catch {
+    payload = null;
+  }
+  const raw = payload?.error;
+  const upstreamMessage = typeof raw === 'string'
+    ? raw
+    : raw?.message || raw?.code || (typeof payload?.message === 'string' ? payload.message : '');
+
+  if (status === 400) return upstreamMessage || 'DeepSeek 请求参数不被接受，请检查模型、JSON 输出或 token 限制。';
+  if (status === 401 || status === 403) return 'DeepSeek API Key 无效、权限不足或账户未开通该模型。';
+  if (status === 402) return 'DeepSeek 账户余额不足或额度不可用，请检查控制台余额。';
+  if (status === 404) return 'DeepSeek 模型或接口不存在，请切换模型后重试。';
+  if (status === 429) return 'DeepSeek 请求过于频繁或并发受限，请稍后再试。';
+  if (status >= 500) return 'DeepSeek 服务暂时不可用，请稍后重试。';
+  return upstreamMessage || `DeepSeek 请求失败 HTTP ${status}`;
+}
+
+function sendDeepSeekResponse(res, upstream, text) {
+  const contentType = upstream.headers.get('content-type') || 'application/json; charset=utf-8';
+  if (!upstream.ok) {
+    return res.status(upstream.status).json({ error: deepSeekErrorMessage(upstream.status, text) });
+  }
+  return res.status(upstream.status).type(contentType).send(text);
 }
 
 // ── Routes ──────────────────────────────────────────
@@ -635,14 +687,14 @@ app.post('/api/ai/models', aiLimiter, [
   if (!validateDeepSeekKey(apiKey)) return res.status(400).json({ error: '请填写有效的 DeepSeek API Key' });
 
   try {
-    const upstream = await fetchWithTimeout('https://api.deepseek.com/v1/models', {
+    const { response: upstream, text } = await fetchTextWithTimeout(DEEPSEEK_MODELS_URL, {
       headers: { Authorization: `Bearer ${apiKey}` },
-    }, 15000);
-    const text = await upstream.text();
-    res.status(upstream.status).type(upstream.headers.get('content-type') || 'application/json').send(text);
+    }, DEEPSEEK_MODELS_TIMEOUT_MS);
+    sendDeepSeekResponse(res, upstream, text);
   } catch (err) {
     console.error('DeepSeek models proxy error:', err);
-    res.status(502).json({ error: '无法连接 DeepSeek，请稍后重试或检查服务器网络' });
+    const status = err?.name === 'AbortError' ? 504 : 502;
+    res.status(status).json({ error: '无法连接 DeepSeek，请稍后重试或检查服务器网络' });
   }
 });
 
@@ -663,19 +715,32 @@ app.post('/api/ai/chat', auth, aiLimiter, [
   if (!messages) return res.status(400).json({ error: '对话内容过长或格式不正确' });
 
   try {
-    const upstream = await fetchWithTimeout('https://api.deepseek.com/v1/chat/completions', {
+    const modelPayload = normalizeDeepSeekModel(model);
+    const requestBody = {
+      ...modelPayload,
+      messages,
+      temperature,
+      max_tokens,
+      stream: false,
+      response_format: { type: 'json_object' },
+    };
+    const { response: upstream, text } = await fetchTextWithTimeout(DEEPSEEK_CHAT_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({ model, messages, temperature, max_tokens }),
-    }, 60000);
-    const text = await upstream.text();
-    res.status(upstream.status).type(upstream.headers.get('content-type') || 'application/json').send(text);
+      body: JSON.stringify(requestBody),
+    }, DEEPSEEK_CHAT_TIMEOUT_MS);
+    sendDeepSeekResponse(res, upstream, text);
   } catch (err) {
     console.error('DeepSeek chat proxy error:', err);
-    res.status(502).json({ error: 'AI 服务暂时不可达，请检查后端部署网络或稍后重试' });
+    const status = err?.name === 'AbortError' ? 504 : 502;
+    const seconds = Math.round(DEEPSEEK_CHAT_TIMEOUT_MS / 1000);
+    const message = status === 504
+      ? `AI 生成超过 ${seconds} 秒仍未完成，请切换极速模型、减少天数或稍后重试。`
+      : 'AI 服务暂时不可达，请检查后端部署网络或稍后重试';
+    res.status(status).json({ error: message });
   }
 });
 
