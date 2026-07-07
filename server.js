@@ -19,6 +19,7 @@ const DEFAULT_DEV_JWT_SECRET = 'bbtravel_jwt_secret_2026_change_in_prod';
 const isProduction = process.env.NODE_ENV === 'production' || Boolean(process.env.RAILWAY_ENVIRONMENT || process.env.RENDER || process.env.FLY_APP_NAME);
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
 const DB_PATH = path.resolve(process.env.DB_PATH || path.join(process.env.DATA_DIR || path.join(__dirname, 'data'), 'bbuser.db'));
+const STATIC_DIR = path.resolve(process.env.STATIC_DIR || path.join(__dirname, 'cloudflare-deploy'));
 const USERNAME_RE = /^[\p{L}\p{N}_-]{3,30}$/u;
 const QQ_EMAIL_RE = /^\d{5,12}@qq\.com$/;
 const DEEPSEEK_KEY_RE = /^sk-[A-Za-z0-9_-]{20,200}$/;
@@ -28,7 +29,19 @@ const DEFAULT_ALLOWED_ORIGINS = [
   'http://127.0.0.1:8787',
   'http://localhost:3001',
   'http://127.0.0.1:3001',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:4173',
+  'http://127.0.0.1:4173',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+  'http://localhost:8338',
+  'http://127.0.0.1:8338',
+  'http://localhost:8339',
+  'http://127.0.0.1:8339',
 ];
+const truthyValues = new Set(['1', 'true', 'yes', 'on']);
+const ALLOW_FILE_ORIGIN = truthyValues.has(String(process.env.ALLOW_FILE_ORIGIN || '').trim().toLowerCase());
 const configuredOrigins = new Set([
   ...DEFAULT_ALLOWED_ORIGINS,
   ...String(process.env.ALLOWED_ORIGINS || '')
@@ -38,6 +51,12 @@ const configuredOrigins = new Set([
 ]);
 const netlifyOriginPattern = /^https:\/\/[a-z0-9-]+\.netlify\.app$/i;
 const cloudflareOriginPattern = /^https:\/\/([a-z0-9-]+\.)*[a-z0-9-]+\.(pages|workers)\.dev$/i;
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  if (origin === 'null') return !isProduction || ALLOW_FILE_ORIGIN;
+  return configuredOrigins.has(origin) || netlifyOriginPattern.test(origin) || cloudflareOriginPattern.test(origin);
+}
 
 function resolveJwtSecret() {
   const configuredSecret = process.env.JWT_SECRET || '';
@@ -118,11 +137,10 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({
   credentials: true,
   origin(origin, callback) {
-    if (!origin) return callback(null, true);
-    if (configuredOrigins.has(origin) || netlifyOriginPattern.test(origin) || cloudflareOriginPattern.test(origin)) {
+    if (isAllowedOrigin(origin)) {
       return callback(null, true);
     }
-    return callback(new Error('CORS origin blocked'));
+    return callback(new Error(origin === 'null' ? 'CORS null origin blocked' : 'CORS origin blocked'));
   },
 }));
 app.use(rateLimit({
@@ -140,8 +158,12 @@ app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && 'body' in err) {
     return res.status(400).json({ error: 'JSON格式错误' });
   }
-  if (err?.message === 'CORS origin blocked') {
-    return res.status(403).json({ error: '来源不允许' });
+  if (err?.message === 'CORS origin blocked' || err?.message === 'CORS null origin blocked') {
+    const origin = req.headers.origin || '';
+    const message = origin === 'null'
+      ? '本地 file:// 页面来源未被允许。请用本地 HTTP 服务打开页面，或在后端设置 ALLOW_FILE_ORIGIN=true 后重新部署。'
+      : '来源不允许';
+    return res.status(403).json({ error: message });
   }
   return next(err);
 });
@@ -668,9 +690,9 @@ app.use('/api', (req, res) => {
 
 // Static files — local dev only unless explicitly enabled.
 if (!isProduction || process.env.SERVE_STATIC === 'true') {
-  app.use(express.static(path.join(__dirname, '..', 'cloudflare-deploy')));
+  app.use(express.static(STATIC_DIR));
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'cloudflare-deploy', 'index.html'));
+    res.sendFile(path.join(STATIC_DIR, 'index.html'));
   });
 }
 
