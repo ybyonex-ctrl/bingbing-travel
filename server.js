@@ -29,7 +29,7 @@ const DEEPSEEK_CHAT_URL = `${DEEPSEEK_API_BASE}/chat/completions`;
 const ALLOWED_MODELS = new Set(['deepseek-v4-flash', 'deepseek-v4-pro', 'deepseek-chat', 'deepseek-reasoner']);
 const DEEPSEEK_MODELS_TIMEOUT_MS = parseDurationMs(process.env.DEEPSEEK_MODELS_TIMEOUT_MS, 20000, 5000, 60000);
 const DEEPSEEK_CHAT_TIMEOUT_MS = parseDurationMs(process.env.DEEPSEEK_CHAT_TIMEOUT_MS, 180000, 60000, 300000);
-const DEFAULT_ALLOWED_ORIGINS = [
+const DEFAULT_DEV_ALLOWED_ORIGINS = [
   'http://localhost:8787',
   'http://127.0.0.1:8787',
   'http://localhost:3001',
@@ -48,14 +48,15 @@ const DEFAULT_ALLOWED_ORIGINS = [
 const truthyValues = new Set(['1', 'true', 'yes', 'on']);
 const ALLOW_FILE_ORIGIN = truthyValues.has(String(process.env.ALLOW_FILE_ORIGIN || '').trim().toLowerCase());
 const configuredOrigins = new Set([
-  ...DEFAULT_ALLOWED_ORIGINS,
+  // Production callers must be explicitly listed in ALLOWED_ORIGINS. Do not
+  // trust every Netlify/Cloudflare subdomain: those domains host third-party
+  // sites too.
+  ...(!isProduction ? DEFAULT_DEV_ALLOWED_ORIGINS : []),
   ...String(process.env.ALLOWED_ORIGINS || '')
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean),
 ]);
-const netlifyOriginPattern = /^https:\/\/[a-z0-9-]+\.netlify\.app$/i;
-const cloudflareOriginPattern = /^https:\/\/([a-z0-9-]+\.)*[a-z0-9-]+\.(pages|workers)\.dev$/i;
 
 function parseDurationMs(value, fallback, min, max) {
   const n = Number(value);
@@ -65,8 +66,8 @@ function parseDurationMs(value, fallback, min, max) {
 
 function isAllowedOrigin(origin) {
   if (!origin) return true;
-  if (origin === 'null') return !isProduction || ALLOW_FILE_ORIGIN;
-  return configuredOrigins.has(origin) || netlifyOriginPattern.test(origin) || cloudflareOriginPattern.test(origin);
+  if (origin === 'null') return !isProduction && ALLOW_FILE_ORIGIN;
+  return configuredOrigins.has(origin);
 }
 
 function resolveJwtSecret() {
@@ -102,9 +103,16 @@ async function initDB() {
     username TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     qq_email TEXT DEFAULT '',
+    token_version INTEGER NOT NULL DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now'))
   )`);
+  // Lightweight migration for databases created before token invalidation was
+  // introduced. Existing users start at version 0 and are signed out once.
+  const userColumns = dbAll('PRAGMA table_info(users)').map((column) => column.name);
+  if (!userColumns.includes('token_version')) {
+    db.run('ALTER TABLE users ADD COLUMN token_version INTEGER NOT NULL DEFAULT 0');
+  }
   saveDB();
 }
 
@@ -187,6 +195,14 @@ const authLimiter = rateLimit({
   message: { error: '请求过于频繁，请15分钟后重试' }
 });
 
+const passwordResetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: '密码重置请求过于频繁，请15分钟后重试' }
+});
+
 const aiLimiter = rateLimit({
   windowMs: 5 * 60 * 1000,
   max: 40,
@@ -203,12 +219,27 @@ function auth(req, res, next) {
   }
   try {
     const decoded = jwt.verify(header.slice(7), JWT_SECRET);
-    req.userId = decoded.id;
-    req.username = decoded.username;
+    if (!Number.isInteger(decoded.id) || !Number.isInteger(decoded.tokenVersion)) {
+      return res.status(401).json({ error: '登录已过期，请重新登录' });
+    }
+    const user = dbGet('SELECT id, username, token_version FROM users WHERE id = ?', [decoded.id]);
+    if (!user || decoded.tokenVersion !== user.token_version) {
+      return res.status(401).json({ error: '登录已过期，请重新登录' });
+    }
+    req.userId = user.id;
+    req.username = user.username;
     next();
   } catch {
     return res.status(401).json({ error: '登录已过期，请重新登录' });
   }
+}
+
+function issueAuthToken(user) {
+  return jwt.sign({
+    id: user.id,
+    username: user.username,
+    tokenVersion: Number(user.token_version) || 0,
+  }, JWT_SECRET, { expiresIn: '7d' });
 }
 
 function timingSafeStringEqual(a, b) {
@@ -347,8 +378,8 @@ app.post('/api/auth/register', authLimiter, [
     const hashed = await bcrypt.hash(password, 12);
     dbRun('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashed]);
 
-    const user = dbGet('SELECT id FROM users WHERE username = ?', [username]);
-    const token = jwt.sign({ id: user.id, username }, JWT_SECRET, { expiresIn: '7d' });
+    const user = dbGet('SELECT id, username, token_version FROM users WHERE username = ?', [username]);
+    const token = issueAuthToken(user);
     res.json({ token, username, userId: user.id });
   } catch (err) {
     console.error('Register error:', err);
@@ -376,7 +407,7 @@ app.post('/api/auth/login', authLimiter, [
       return res.status(401).json({ error: '用户名或密码错误' });
     }
 
-    const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
+    const token = issueAuthToken(user);
     res.json({ token, username: user.username, userId: user.id, qqEmail: user.qq_email || '' });
   } catch (err) {
     console.error('Login error:', err);
@@ -553,7 +584,7 @@ setInterval(() => {
 }, 300000);
 
 // Forgot password — send verification code to QQ email
-app.post('/api/auth/forgot-password', authLimiter, [
+app.post('/api/auth/forgot-password', passwordResetLimiter, [
   body('username').isString().trim().matches(USERNAME_RE).withMessage('用户名格式不正确'),
   body('qqEmail').isString().trim().matches(QQ_EMAIL_RE).withMessage('请输入正确的QQ邮箱'),
 ], async (req, res) => {
@@ -563,11 +594,12 @@ app.post('/api/auth/forgot-password', authLimiter, [
     const qqEmail = normalizeQQEmail(req.body.qqEmail);
 
     const user = dbGet('SELECT id, qq_email FROM users WHERE username = ?', [username]);
-    if (!user) {
-      return res.status(404).json({ error: '用户名不存在' });
-    }
-    if (!user.qq_email || user.qq_email !== qqEmail) {
-      return res.status(400).json({ error: 'QQ邮箱与绑定的邮箱不匹配' });
+    if (!user || !user.qq_email || user.qq_email !== qqEmail) {
+      if (isProduction) {
+        // Do not disclose whether an account or QQ address exists.
+        return res.status(202).json({ message: '若账号信息匹配，验证码将发送到绑定邮箱' });
+      }
+      return res.status(400).json({ error: '用户名或QQ邮箱不匹配' });
     }
 
     // Check rate limit for this username
@@ -624,7 +656,7 @@ app.post('/api/admin/cleanup-dup-qq', requireAdminToken, (req, res) => {
     res.status(500).json({ error: '清理失败' });
   }
 });
-app.post('/api/auth/reset-password', authLimiter, [
+app.post('/api/auth/reset-password', passwordResetLimiter, [
   body('username').isString().trim().matches(USERNAME_RE).withMessage('用户名格式不正确'),
   body('code').isString().trim().matches(/^\d{6}$/).withMessage('请输入6位验证码'),
   body('newPassword').isString().isLength({ min: 8, max: 100 }).withMessage('新密码至少8字符'),
@@ -649,7 +681,7 @@ app.post('/api/auth/reset-password', authLimiter, [
     }
 
     const hashed = await bcrypt.hash(newPassword, 12);
-    dbRun("UPDATE users SET password = ?, updated_at = datetime('now') WHERE username = ?", [hashed, username]);
+    dbRun("UPDATE users SET password = ?, token_version = token_version + 1, updated_at = datetime('now') WHERE username = ?", [hashed, username]);
     
     verificationCodes.delete(username);
     res.json({ message: '密码已重置，请使用新密码登录' });
@@ -671,7 +703,7 @@ app.post('/api/auth/change-password', auth, [
     if (!match) return res.status(401).json({ error: '原密码错误' });
 
     const hashed = await bcrypt.hash(req.body.newPassword, 12);
-    dbRun("UPDATE users SET password = ?, updated_at = datetime('now') WHERE id = ?", [hashed, req.userId]);
+    dbRun("UPDATE users SET password = ?, token_version = token_version + 1, updated_at = datetime('now') WHERE id = ?", [hashed, req.userId]);
     res.json({ message: '密码已修改' });
   } catch (err) {
     res.status(500).json({ error: '服务器错误' });
