@@ -17,9 +17,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3001;
 const DEFAULT_DEV_JWT_SECRET = 'bbtravel_jwt_secret_2026_change_in_prod';
 const isProduction = process.env.NODE_ENV === 'production' || Boolean(process.env.RAILWAY_ENVIRONMENT || process.env.RENDER || process.env.FLY_APP_NAME);
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
 const DB_PATH = path.resolve(process.env.DB_PATH || path.join(process.env.DATA_DIR || path.join(__dirname, 'data'), 'bbuser.db'));
-const STATIC_DIR = path.resolve(process.env.STATIC_DIR || path.join(__dirname, 'cloudflare-deploy'));
+const STATIC_DIR = path.resolve(process.env.STATIC_DIR || path.join(__dirname, 'netlify-deploy'));
 const USERNAME_RE = /^[\p{L}\p{N}_-]{3,30}$/u;
 const QQ_EMAIL_RE = /^\d{5,12}@qq\.com$/;
 const DEEPSEEK_KEY_RE = /^sk-[A-Za-z0-9_-]{20,200}$/;
@@ -29,6 +28,25 @@ const DEEPSEEK_CHAT_URL = `${DEEPSEEK_API_BASE}/chat/completions`;
 const ALLOWED_MODELS = new Set(['deepseek-v4-flash', 'deepseek-v4-pro', 'deepseek-chat', 'deepseek-reasoner']);
 const DEEPSEEK_MODELS_TIMEOUT_MS = parseDurationMs(process.env.DEEPSEEK_MODELS_TIMEOUT_MS, 20000, 5000, 60000);
 const DEEPSEEK_CHAT_TIMEOUT_MS = parseDurationMs(process.env.DEEPSEEK_CHAT_TIMEOUT_MS, 180000, 60000, 300000);
+const UPSTREAM_RESPONSE_LIMIT_BYTES = parseInteger(process.env.UPSTREAM_RESPONSE_LIMIT_BYTES, 2 * 1024 * 1024, 64 * 1024, 8 * 1024 * 1024);
+const TRUST_PROXY_HOPS = parseInteger(process.env.TRUST_PROXY_HOPS, 1, 0, 10);
+const GLOBAL_RATE_LIMIT_MAX = parseInteger(process.env.GLOBAL_RATE_LIMIT_MAX, 240, 30, 5000);
+const AUTH_RATE_LIMIT_MAX = parseInteger(process.env.AUTH_RATE_LIMIT_MAX, 15, 3, 200);
+const PASSWORD_RESET_RATE_LIMIT_MAX = parseInteger(process.env.PASSWORD_RESET_RATE_LIMIT_MAX, 6, 2, 100);
+const ADMIN_RATE_LIMIT_MAX = parseInteger(process.env.ADMIN_RATE_LIMIT_MAX, 5, 1, 50);
+const AI_IP_RATE_LIMIT_MAX = parseInteger(process.env.AI_IP_RATE_LIMIT_MAX, 24, 2, 500);
+const AI_USER_RATE_LIMIT_MAX = parseInteger(process.env.AI_USER_RATE_LIMIT_MAX, 16, 1, 500);
+const AI_DAILY_QUOTA = parseInteger(process.env.AI_DAILY_QUOTA, 60, 1, 10000);
+const AI_USER_CONCURRENCY = parseInteger(process.env.AI_USER_CONCURRENCY, 1, 1, 10);
+const AI_GLOBAL_CONCURRENCY = parseInteger(process.env.AI_GLOBAL_CONCURRENCY, 8, 1, 100);
+const AI_MAX_TOKENS = parseInteger(process.env.AI_MAX_TOKENS, 4096, 512, 8192);
+const REQUEST_BODY_LIMIT = parseBodyLimit(process.env.REQUEST_BODY_LIMIT || '256kb');
+const truthyValues = new Set(['1', 'true', 'yes', 'on']);
+const GEO_BLOCK_ENABLED = truthyValues.has(String(process.env.GEO_BLOCK_ENABLED || '').trim().toLowerCase());
+const GEO_REQUIRE_COUNTRY_HEADER_FOR_ADMIN = truthyValues.has(String(process.env.GEO_REQUIRE_COUNTRY_HEADER_FOR_ADMIN || '').trim().toLowerCase());
+const ALLOWED_COUNTRIES = parseCountrySet(process.env.ALLOWED_COUNTRIES);
+const BLOCKED_COUNTRIES = parseCountrySet(process.env.BLOCKED_COUNTRIES);
+const ADMIN_IP_ALLOWLIST = new Set(String(process.env.ADMIN_IP_ALLOWLIST || '').split(',').map(normalizeIp).filter(Boolean));
 const DEFAULT_DEV_ALLOWED_ORIGINS = [
   'http://localhost:8787',
   'http://127.0.0.1:8787',
@@ -45,7 +63,6 @@ const DEFAULT_DEV_ALLOWED_ORIGINS = [
   'http://localhost:8339',
   'http://127.0.0.1:8339',
 ];
-const truthyValues = new Set(['1', 'true', 'yes', 'on']);
 const ALLOW_FILE_ORIGIN = truthyValues.has(String(process.env.ALLOW_FILE_ORIGIN || '').trim().toLowerCase());
 const configuredOrigins = new Set([
   // Production callers must be explicitly listed in ALLOWED_ORIGINS. Do not
@@ -54,9 +71,15 @@ const configuredOrigins = new Set([
   ...(!isProduction ? DEFAULT_DEV_ALLOWED_ORIGINS : []),
   ...String(process.env.ALLOWED_ORIGINS || '')
     .split(',')
-    .map((origin) => origin.trim())
+    .map(normalizeConfiguredOrigin)
     .filter(Boolean),
 ]);
+
+function parseInteger(value, fallback, min, max) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, Math.round(n)));
+}
 
 function parseDurationMs(value, fallback, min, max) {
   const n = Number(value);
@@ -64,9 +87,49 @@ function parseDurationMs(value, fallback, min, max) {
   return Math.min(max, Math.max(min, Math.round(n)));
 }
 
+function parseBodyLimit(value) {
+  const match = String(value || '').trim().toLowerCase().match(/^(\d{1,4})(kb|mb)$/);
+  if (!match) return '256kb';
+  const bytes = Number(match[1]) * (match[2] === 'mb' ? 1024 * 1024 : 1024);
+  return `${Math.max(32, Math.min(1024, Math.round(bytes / 1024)))}kb`;
+}
+
+function parseCountrySet(value) {
+  return new Set(String(value || '')
+    .split(',')
+    .map((country) => country.trim().toUpperCase())
+    .filter((country) => /^[A-Z]{2}$/.test(country)));
+}
+
+function normalizeConfiguredOrigin(value) {
+  const raw = String(value || '').trim();
+  if (!raw || raw === '*') return '';
+  try {
+    const url = new URL(raw);
+    return (url.protocol === 'http:' || url.protocol === 'https:') ? url.origin : '';
+  } catch {
+    return '';
+  }
+}
+
+function normalizeIp(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (!raw) return '';
+  const withoutMappedPrefix = raw.startsWith('::ffff:') ? raw.slice(7) : raw;
+  return withoutMappedPrefix.replace(/^\[|\]$/g, '').split('%')[0];
+}
+
 function isAllowedOrigin(origin) {
   if (!origin) return true;
   if (origin === 'null') return !isProduction && ALLOW_FILE_ORIGIN;
+  if (!isProduction) {
+    try {
+      const url = new URL(origin);
+      if ((url.protocol === 'http:' || url.protocol === 'https:') && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)) return true;
+    } catch {
+      return false;
+    }
+  }
   return configuredOrigins.has(origin);
 }
 
@@ -74,15 +137,26 @@ function resolveJwtSecret() {
   const configuredSecret = process.env.JWT_SECRET || '';
   if (!isProduction) return configuredSecret || DEFAULT_DEV_JWT_SECRET;
 
-  if (configuredSecret && configuredSecret !== DEFAULT_DEV_JWT_SECRET && configuredSecret.length >= 32) {
+  const uniqueChars = new Set(configuredSecret).size;
+  if (configuredSecret && configuredSecret !== DEFAULT_DEV_JWT_SECRET && configuredSecret.length >= 48 && uniqueChars >= 12) {
     return configuredSecret;
   }
 
-  console.warn('JWT_SECRET is missing or weak; using an ephemeral random secret for this process.');
-  return crypto.randomBytes(48).toString('hex');
+  throw new Error('Production startup blocked: JWT_SECRET must be a unique random secret with at least 48 characters.');
 }
 
 const JWT_SECRET = resolveJwtSecret();
+const SECURITY_LOG_SALT = process.env.SECURITY_LOG_SALT || (isProduction ? JWT_SECRET : crypto.randomBytes(32).toString('hex'));
+
+function resolveAdminToken() {
+  const token = String(process.env.ADMIN_TOKEN || '');
+  if (!token) return '';
+  if (token.length >= 32 && new Set(token).size >= 10) return token;
+  console.warn(JSON.stringify({ level: 'warn', event: 'admin_token_disabled', reason: 'missing_entropy_or_length' }));
+  return '';
+}
+
+const ADMIN_TOKEN = resolveAdminToken();
 
 // ── Database Setup ──────────────────────────────────
 let db;
@@ -148,13 +222,128 @@ function dbAll(sql, params = []) {
   return rows;
 }
 
+function fingerprint(value) {
+  return crypto.createHmac('sha256', SECURITY_LOG_SALT).update(String(value || 'unknown')).digest('hex').slice(0, 12);
+}
+
+function clientIp(req) {
+  return normalizeIp(req.ip || req.socket?.remoteAddress || 'unknown');
+}
+
+function requestCountry(req) {
+  const value = req.get('cf-ipcountry') || req.get('x-vercel-ip-country') || req.get('cloudfront-viewer-country') || '';
+  const country = String(value).trim().toUpperCase();
+  return /^[A-Z]{2}$/.test(country) ? country : '';
+}
+
+function redactLogText(value) {
+  return String(value ?? '')
+    .replace(/sk-[A-Za-z0-9_-]{20,200}/gi, '[REDACTED_DEEPSEEK_KEY]')
+    .replace(/Bearer\s+[A-Za-z0-9._~-]+/gi, 'Bearer [REDACTED]')
+    .replace(/eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g, '[REDACTED_JWT]');
+}
+
+function sanitizeLogDetails(details) {
+  const sanitized = {};
+  for (const [key, value] of Object.entries(details || {})) {
+    if (/(authorization|api.?key|token|secret|password|cookie)/i.test(key)) {
+      sanitized[key] = '[REDACTED]';
+    } else if (typeof value === 'string') {
+      sanitized[key] = redactLogText(value).slice(0, 240);
+    } else if (typeof value === 'number' || typeof value === 'boolean' || value == null) {
+      sanitized[key] = value;
+    }
+  }
+  return sanitized;
+}
+
+function securityLog(event, req, details = {}) {
+  console.warn(JSON.stringify({
+    level: 'warn',
+    event,
+    requestId: req?.requestId || '-',
+    route: String(req?.originalUrl || '').split('?')[0].slice(0, 160),
+    ipHash: fingerprint(clientIp(req)),
+    userId: Number.isInteger(req?.userId) ? req.userId : undefined,
+    country: requestCountry(req) || undefined,
+    ...sanitizeLogDetails(details),
+  }));
+}
+
+function logError(event, err, req) {
+  console.error(JSON.stringify({
+    level: 'error',
+    event,
+    requestId: req?.requestId || '-',
+    route: String(req?.originalUrl || '').split('?')[0].slice(0, 160),
+    ipHash: req ? fingerprint(clientIp(req)) : undefined,
+    errorName: redactLogText(err?.name || 'Error').slice(0, 80),
+    errorCode: redactLogText(err?.code || '').slice(0, 80) || undefined,
+    ...(!isProduction ? { message: redactLogText(err?.message || err || '').slice(0, 240) } : {}),
+  }));
+}
+
+function geoRiskGuard(req, res, next) {
+  if (!GEO_BLOCK_ENABLED) return next();
+  const country = requestCountry(req);
+  const isAdminRoute = req.baseUrl.startsWith('/api/admin') || req.originalUrl.startsWith('/api/admin/');
+  if (!country) {
+    if (isAdminRoute && GEO_REQUIRE_COUNTRY_HEADER_FOR_ADMIN) {
+      securityLog('geo_country_missing', req);
+      return res.status(403).json({ error: '当前网络无法完成安全校验，请联系管理员' });
+    }
+    return next();
+  }
+  const blocked = BLOCKED_COUNTRIES.has(country) || (ALLOWED_COUNTRIES.size > 0 && !ALLOWED_COUNTRIES.has(country));
+  if (!blocked) return next();
+  securityLog('geo_request_blocked', req, { policy: ALLOWED_COUNTRIES.size > 0 ? 'allowlist' : 'blocklist' });
+  return res.status(403).json({ error: '当前地区暂不支持此敏感操作' });
+}
+
+function rateLimitHandler(event, message) {
+  return (req, res) => {
+    securityLog(event, req);
+    res.status(429).json({ error: message });
+  };
+}
+
 // ── Express App ─────────────────────────────────────
 const app = express();
 app.disable('x-powered-by');
-app.set('trust proxy', 1);
-app.use(helmet({ contentSecurityPolicy: false }));
+app.set('trust proxy', TRUST_PROXY_HOPS);
+app.use((req, res, next) => {
+  const incomingId = String(req.get('x-request-id') || '').trim();
+  req.requestId = /^[A-Za-z0-9._:-]{8,80}$/.test(incomingId) ? incomingId : crypto.randomUUID();
+  res.set('X-Request-ID', req.requestId);
+  next();
+});
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      baseUri: ["'self'"],
+      objectSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+      formAction: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
+      scriptSrcAttr: ["'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://unpkg.com'],
+      fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
+      imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+      connectSrc: ["'self'", 'https://bingbing-travel-production.up.railway.app'],
+      frameSrc: ["'self'", 'blob:'],
+      workerSrc: ["'self'", 'blob:'],
+      upgradeInsecureRequests: isProduction ? [] : null,
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+}));
 app.use(cors({
   credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-DeepSeek-API-Key'],
   origin(origin, callback) {
     if (isAllowedOrigin(origin)) {
       return callback(null, true);
@@ -162,23 +351,50 @@ app.use(cors({
     return callback(new Error(origin === 'null' ? 'CORS null origin blocked' : 'CORS origin blocked'));
   },
 }));
+// Capture the user's BYOK credential, then remove the raw header before any
+// downstream application logging can accidentally serialize request headers.
+app.use('/api/ai', (req, res, next) => {
+  const apiKey = String(req.get('x-deepseek-api-key') || '').trim();
+  Object.defineProperty(req, 'deepSeekApiKey', {
+    value: apiKey,
+    enumerable: false,
+    writable: false,
+  });
+  delete req.headers['x-deepseek-api-key'];
+  res.set({
+    'Cache-Control': 'no-store, max-age=0',
+    Pragma: 'no-cache',
+  });
+  next();
+});
+app.use(['/api/auth', '/api/ai', '/api/admin'], geoRiskGuard);
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 300,
+  max: GLOBAL_RATE_LIMIT_MAX,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: '请求过于频繁，请稍后重试' },
+  handler: rateLimitHandler('global_rate_limited', '访问过于频繁，请稍后再试'),
 }));
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: REQUEST_BODY_LIMIT, strict: true, type: 'application/json' }));
+// Reject the legacy body credential path by removing it before validation and
+// proxying. DeepSeek keys are accepted only through the short-lived BYOK header.
+app.use('/api/ai', (req, res, next) => {
+  if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'apiKey')) {
+    delete req.body.apiKey;
+  }
+  next();
+});
 app.use((err, req, res, next) => {
   if (err?.type === 'entity.too.large') {
-    return res.status(413).json({ error: '请求体过大' });
+    securityLog('request_body_too_large', req);
+    return res.status(413).json({ error: `请求内容过大，请精简后重试（上限 ${REQUEST_BODY_LIMIT}）` });
   }
   if (err instanceof SyntaxError && 'body' in err) {
-    return res.status(400).json({ error: 'JSON格式错误' });
+    return res.status(400).json({ error: '请求内容格式不正确，请检查后重试' });
   }
   if (err?.message === 'CORS origin blocked' || err?.message === 'CORS null origin blocked') {
     const origin = req.headers.origin || '';
+    securityLog('cors_origin_blocked', req, { originHash: fingerprint(origin) });
     const message = origin === 'null'
       ? '本地 file:// 页面来源未被允许。请用本地 HTTP 服务打开页面，或在后端设置 ALLOW_FILE_ORIGIN=true 后重新部署。'
       : '来源不允许';
@@ -189,27 +405,108 @@ app.use((err, req, res, next) => {
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,
+  max: AUTH_RATE_LIMIT_MAX,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: '请求过于频繁，请15分钟后重试' }
+  handler: rateLimitHandler('auth_ip_rate_limited', '尝试次数过多，请15分钟后再试'),
+});
+
+const authAccountLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: AUTH_RATE_LIMIT_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => `account:${fingerprint(normalizeUsername(req.body?.username))}`,
+  handler: rateLimitHandler('auth_account_rate_limited', '此账户尝试次数过多，请15分钟后再试'),
 });
 
 const passwordResetLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 8,
+  max: PASSWORD_RESET_RATE_LIMIT_MAX,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: '密码重置请求过于频繁，请15分钟后重试' }
+  handler: rateLimitHandler('password_reset_ip_rate_limited', '密码找回请求过多，请15分钟后再试'),
 });
 
-const aiLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000,
-  max: 40,
+const passwordResetAccountLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: PASSWORD_RESET_RATE_LIMIT_MAX,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'AI请求过于频繁，请稍后重试' }
+  keyGenerator: (req) => `reset:${fingerprint(normalizeUsername(req.body?.username))}`,
+  handler: rateLimitHandler('password_reset_account_rate_limited', '此账户的密码找回请求过多，请15分钟后再试'),
 });
+
+const adminLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: ADMIN_RATE_LIMIT_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: rateLimitHandler('admin_rate_limited', 'Too many requests'),
+});
+
+const aiIpLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: AI_IP_RATE_LIMIT_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: rateLimitHandler('ai_ip_rate_limited', 'AI 请求过于频繁，请稍后再试'),
+});
+
+const aiUserLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: AI_USER_RATE_LIMIT_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => `user:${req.userId}`,
+  handler: rateLimitHandler('ai_user_rate_limited', '你的 AI 请求过于频繁，请稍后再试'),
+});
+
+const aiDailyUsage = new Map();
+const aiConcurrencyByUser = new Map();
+let aiGlobalConcurrency = 0;
+
+function aiDailyQuota(req, res, next) {
+  const userKey = String(req.userId);
+  const day = new Date().toISOString().slice(0, 10);
+  const current = aiDailyUsage.get(userKey);
+  const bucket = current?.day === day ? current : { day, count: 0 };
+  if (bucket.count >= AI_DAILY_QUOTA) {
+    const nextDay = Date.parse(`${day}T00:00:00.000Z`) + 24 * 60 * 60 * 1000;
+    res.set('Retry-After', String(Math.max(1, Math.ceil((nextDay - Date.now()) / 1000))));
+    securityLog('ai_daily_quota_exceeded', req);
+    return res.status(429).json({ error: '今天的 AI 生成额度已用完，请明天再试' });
+  }
+  bucket.count += 1;
+  aiDailyUsage.set(userKey, bucket);
+  res.set('X-AI-Quota-Remaining', String(Math.max(0, AI_DAILY_QUOTA - bucket.count)));
+  next();
+}
+
+function aiConcurrencyGuard(req, res, next) {
+  const userKey = String(req.userId);
+  const userCount = aiConcurrencyByUser.get(userKey) || 0;
+  if (aiGlobalConcurrency >= AI_GLOBAL_CONCURRENCY || userCount >= AI_USER_CONCURRENCY) {
+    securityLog('ai_concurrency_rejected', req, { scope: aiGlobalConcurrency >= AI_GLOBAL_CONCURRENCY ? 'global' : 'user' });
+    res.set('Retry-After', '15');
+    return res.status(429).json({ error: '已有行程正在生成，请等待完成或取消后再试' });
+  }
+
+  aiGlobalConcurrency += 1;
+  aiConcurrencyByUser.set(userKey, userCount + 1);
+  let released = false;
+  const release = () => {
+    if (released) return;
+    released = true;
+    aiGlobalConcurrency = Math.max(0, aiGlobalConcurrency - 1);
+    const nextCount = Math.max(0, (aiConcurrencyByUser.get(userKey) || 1) - 1);
+    if (nextCount === 0) aiConcurrencyByUser.delete(userKey);
+    else aiConcurrencyByUser.set(userKey, nextCount);
+  };
+  res.once('finish', release);
+  res.once('close', release);
+  next();
+}
 
 // ── Middleware ───────────────────────────────────────
 function auth(req, res, next) {
@@ -274,17 +571,33 @@ function validateRequest(req, res) {
 
 function requireAdminToken(req, res, next) {
   if (!ADMIN_TOKEN) return res.status(404).json({ error: 'Not found' });
+  if (ADMIN_IP_ALLOWLIST.size > 0 && !ADMIN_IP_ALLOWLIST.has(clientIp(req))) {
+    securityLog('admin_ip_blocked', req);
+    return res.status(404).json({ error: 'Not found' });
+  }
   const header = req.headers.authorization || '';
   const bearer = header.startsWith('Bearer ') ? header.slice(7) : '';
   const token = req.get('x-admin-token') || bearer;
   if (!timingSafeStringEqual(token, ADMIN_TOKEN)) {
-    return res.status(403).json({ error: 'Forbidden' });
+    securityLog('admin_auth_failed', req);
+    return res.status(isProduction ? 404 : 403).json({ error: isProduction ? 'Not found' : 'Forbidden' });
   }
   next();
 }
 
 function validateDeepSeekKey(apiKey) {
   return DEEPSEEK_KEY_RE.test(apiKey);
+}
+
+function readDeepSeekKey(req) {
+  return String(req.deepSeekApiKey || '').trim();
+}
+
+function requireDeepSeekKey(req, res, next) {
+  if (!validateDeepSeekKey(readDeepSeekKey(req))) {
+    return res.status(400).json({ error: '请填写你自己的有效 DeepSeek API Key' });
+  }
+  next();
 }
 
 function clampNumber(value, fallback, min, max) {
@@ -297,25 +610,62 @@ function normalizeMessages(messages) {
   if (!Array.isArray(messages) || messages.length === 0 || messages.length > 20) return null;
   const roles = new Set(['system', 'user', 'assistant']);
   const clean = [];
-  for (const msg of messages) {
-    if (!msg || typeof msg !== 'object') return null;
+  let totalLength = 0;
+  let systemMessages = 0;
+  for (let index = 0; index < messages.length; index += 1) {
+    const msg = messages[index];
+    if (!msg || typeof msg !== 'object' || Array.isArray(msg)) return null;
     const role = String(msg.role || '').trim();
-    const content = typeof msg.content === 'string' ? msg.content : '';
-    if (!roles.has(role) || content.length < 1 || content.length > 16000) return null;
+    const content = typeof msg.content === 'string' ? msg.content.trim() : '';
+    if (!roles.has(role) || content.length < 1 || content.length > 12000) return null;
+    totalLength += content.length;
+    if (totalLength > 32000) return null;
+    if (role === 'system') {
+      systemMessages += 1;
+      if (systemMessages > 1 || index !== 0) return null;
+    }
     clean.push({ role, content });
   }
   return clean;
 }
 
-async function fetchTextWithTimeout(url, options, timeoutMs = 30000) {
+async function readResponseText(response, maxBytes, controller) {
+  if (!response.body) return '';
+  const reader = response.body.getReader();
+  const chunks = [];
+  let total = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > maxBytes) {
+      controller.abort();
+      const err = new Error('Upstream response exceeded the configured limit');
+      err.code = 'UPSTREAM_RESPONSE_TOO_LARGE';
+      throw err;
+    }
+    chunks.push(Buffer.from(value));
+  }
+  return Buffer.concat(chunks).toString('utf8');
+}
+
+async function fetchTextWithTimeout(url, options, timeoutMs = 30000, req, res) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const onAborted = () => controller.abort();
+  const onClosed = () => {
+    if (!res?.writableEnded) controller.abort();
+  };
+  req?.once('aborted', onAborted);
+  res?.once('close', onClosed);
   try {
     const response = await fetch(url, { ...options, signal: controller.signal });
-    const text = await response.text();
+    const text = await readResponseText(response, UPSTREAM_RESPONSE_LIMIT_BYTES, controller);
     return { response, text };
   } finally {
     clearTimeout(timer);
+    req?.off('aborted', onAborted);
+    res?.off('close', onClosed);
   }
 }
 
@@ -361,7 +711,7 @@ function sendDeepSeekResponse(res, upstream, text) {
 // ── Routes ──────────────────────────────────────────
 
 // Register
-app.post('/api/auth/register', authLimiter, [
+app.post('/api/auth/register', authLimiter, authAccountLimiter, [
   body('username').isString().trim().matches(USERNAME_RE).withMessage('用户名仅支持中英文、数字、下划线和短横线，长度3-30字符'),
   body('password').isString().isLength({ min: 8, max: 100 }).withMessage('密码至少8字符'),
 ], async (req, res) => {
@@ -382,13 +732,13 @@ app.post('/api/auth/register', authLimiter, [
     const token = issueAuthToken(user);
     res.json({ token, username, userId: user.id });
   } catch (err) {
-    console.error('Register error:', err);
-    res.status(500).json({ error: '服务器错误' });
+    logError('register_failed', err, req);
+    res.status(500).json({ error: '服务器暂时无法完成注册，请稍后重试' });
   }
 });
 
 // Login
-app.post('/api/auth/login', authLimiter, [
+app.post('/api/auth/login', authLimiter, authAccountLimiter, [
   body('username').isString().trim().matches(USERNAME_RE).withMessage('用户名格式不正确'),
   body('password').isString().isLength({ min: 1, max: 100 }).withMessage('请输入密码'),
 ], async (req, res) => {
@@ -399,19 +749,21 @@ app.post('/api/auth/login', authLimiter, [
 
     const user = dbGet('SELECT * FROM users WHERE username = ?', [username]);
     if (!user) {
+      securityLog('auth_login_failed', req, { accountHash: fingerprint(username) });
       return res.status(401).json({ error: '用户名或密码错误' });
     }
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
+      securityLog('auth_login_failed', req, { accountHash: fingerprint(username) });
       return res.status(401).json({ error: '用户名或密码错误' });
     }
 
     const token = issueAuthToken(user);
     res.json({ token, username: user.username, userId: user.id, qqEmail: user.qq_email || '' });
   } catch (err) {
-    console.error('Login error:', err);
-    res.status(500).json({ error: '服务器错误' });
+    logError('login_failed', err, req);
+    res.status(500).json({ error: '服务器暂时无法登录，请稍后重试' });
   }
 });
 
@@ -427,7 +779,7 @@ app.get('/api/user/profile', auth, (req, res) => {
 });
 
 // Bind QQ email
-app.post('/api/user/bind-qq', auth, [
+app.post('/api/user/bind-qq', auth, authLimiter, [
   body('qqEmail').isString().trim().matches(QQ_EMAIL_RE).withMessage('请输入正确的QQ邮箱格式'),
 ], (req, res) => {
   if (!validateRequest(req, res)) return;
@@ -437,7 +789,7 @@ app.post('/api/user/bind-qq', auth, [
     // Check: is this QQ email already bound to another user?
     const existing = dbGet('SELECT id, username FROM users WHERE qq_email = ? AND id != ?', [qqEmail, req.userId]);
     if (existing) {
-      return res.status(409).json({ error: '此QQ邮箱已被用户 ' + existing.username + ' 绑定' });
+      return res.status(409).json({ error: '此 QQ 邮箱已被其他账户绑定，请检查后重试' });
     }
 
     dbRun("UPDATE users SET qq_email = ?, updated_at = datetime('now') WHERE id = ?", [qqEmail, req.userId]);
@@ -449,6 +801,7 @@ app.post('/api/user/bind-qq', auth, [
 
 // Store verification codes in memory (with expiry)
 const verificationCodes = new Map(); // username -> {code, expires, requests, failures}
+const MAX_VERIFICATION_ENTRIES = 10000;
 
 // Generate 6-digit code
 function generateCode() {
@@ -581,10 +934,14 @@ setInterval(() => {
   for (const [k, v] of verificationCodes) {
     if (now > v.expires) verificationCodes.delete(k);
   }
+  const today = new Date().toISOString().slice(0, 10);
+  for (const [key, bucket] of aiDailyUsage) {
+    if (bucket.day !== today) aiDailyUsage.delete(key);
+  }
 }, 300000);
 
 // Forgot password — send verification code to QQ email
-app.post('/api/auth/forgot-password', passwordResetLimiter, [
+app.post('/api/auth/forgot-password', passwordResetLimiter, passwordResetAccountLimiter, [
   body('username').isString().trim().matches(USERNAME_RE).withMessage('用户名格式不正确'),
   body('qqEmail').isString().trim().matches(QQ_EMAIL_RE).withMessage('请输入正确的QQ邮箱'),
 ], async (req, res) => {
@@ -592,14 +949,15 @@ app.post('/api/auth/forgot-password', passwordResetLimiter, [
   try {
     const username = normalizeUsername(req.body.username);
     const qqEmail = normalizeQQEmail(req.body.qqEmail);
+    const genericMessage = '若账户信息匹配，验证码会发送到绑定的 QQ 邮箱';
+
+    if (isProduction && !hasSmtpConfig()) {
+      return res.status(503).json({ error: '密码找回服务暂不可用，请稍后再试' });
+    }
 
     const user = dbGet('SELECT id, qq_email FROM users WHERE username = ?', [username]);
     if (!user || !user.qq_email || user.qq_email !== qqEmail) {
-      if (isProduction) {
-        // Do not disclose whether an account or QQ address exists.
-        return res.status(202).json({ message: '若账号信息匹配，验证码将发送到绑定邮箱' });
-      }
-      return res.status(400).json({ error: '用户名或QQ邮箱不匹配' });
+      return res.status(202).json({ message: genericMessage });
     }
 
     // Check rate limit for this username
@@ -609,15 +967,20 @@ app.post('/api/auth/forgot-password', passwordResetLimiter, [
     }
 
     const code = generateCode();
+    if (verificationCodes.size >= MAX_VERIFICATION_ENTRIES && !verificationCodes.has(username)) {
+      const oldestKey = verificationCodes.keys().next().value;
+      if (oldestKey) verificationCodes.delete(oldestKey);
+    }
     verificationCodes.set(username, { code, expires: Date.now() + 600000, requests: (existing?.requests || 0) + 1, failures: 0 });
 
     if (hasSmtpConfig()) {
       try {
         await sendVerificationEmail(qqEmail, code);
-        return res.json({ message: '验证码已发送到QQ邮箱', ...(isProduction ? {} : { devCode: code }) });
+        return res.status(202).json({ message: genericMessage, ...(isProduction ? {} : { devCode: code }) });
       } catch (mailErr) {
         verificationCodes.delete(username);
-        console.error('Verification email error:', mailErr);
+        logError('verification_email_failed', mailErr, req);
+        if (isProduction) return res.status(202).json({ message: genericMessage });
         return res.status(502).json({ error: '验证码邮件发送失败，请稍后重试或检查邮箱服务配置' });
       }
     }
@@ -629,8 +992,8 @@ app.post('/api/auth/forgot-password', passwordResetLimiter, [
 
     res.json({ message: '验证码已生成', devCode: code, note: 'SMTP未配置，验证码直接显示' });
   } catch (err) {
-    console.error('Forgot password error:', err);
-    res.status(500).json({ error: '服务器错误' });
+    logError('forgot_password_failed', err, req);
+    res.status(500).json({ error: '密码找回服务暂不可用，请稍后再试' });
   }
 });
 
@@ -638,7 +1001,7 @@ app.post('/api/auth/forgot-password', passwordResetLimiter, [
 
 
 // ── Admin: Clean up duplicate QQ email bindings (one-time) ──
-app.post('/api/admin/cleanup-dup-qq', requireAdminToken, (req, res) => {
+app.post('/api/admin/cleanup-dup-qq', adminLimiter, requireAdminToken, (req, res) => {
   try {
     // Find all users with QQ emails that appear more than once
     const dups = dbAll('SELECT qq_email, COUNT(*) as cnt FROM users WHERE qq_email != \'\' GROUP BY qq_email HAVING cnt > 1');
@@ -653,10 +1016,11 @@ app.post('/api/admin/cleanup-dup-qq', requireAdminToken, (req, res) => {
     }
     res.json({ message: '清理完成', removedDuplicates: cleaned, duplicateEmails: dups.length });
   } catch (err) {
+    logError('admin_cleanup_failed', err, req);
     res.status(500).json({ error: '清理失败' });
   }
 });
-app.post('/api/auth/reset-password', passwordResetLimiter, [
+app.post('/api/auth/reset-password', passwordResetLimiter, passwordResetAccountLimiter, [
   body('username').isString().trim().matches(USERNAME_RE).withMessage('用户名格式不正确'),
   body('code').isString().trim().matches(/^\d{6}$/).withMessage('请输入6位验证码'),
   body('newPassword').isString().isLength({ min: 8, max: 100 }).withMessage('新密码至少8字符'),
@@ -686,11 +1050,11 @@ app.post('/api/auth/reset-password', passwordResetLimiter, [
     verificationCodes.delete(username);
     res.json({ message: '密码已重置，请使用新密码登录' });
   } catch (err) {
-    console.error('Reset password error:', err);
-    res.status(500).json({ error: '服务器错误' });
+    logError('reset_password_failed', err, req);
+    res.status(500).json({ error: '密码重置失败，请稍后重试' });
   }
 });
-app.post('/api/auth/change-password', auth, [
+app.post('/api/auth/change-password', auth, authLimiter, [
   body('oldPassword').isString().isLength({ min: 1 }),
   body('newPassword').isString().isLength({ min: 8, max: 100 }).withMessage('新密码至少8个字符'),
 ], async (req, res) => {
@@ -706,43 +1070,42 @@ app.post('/api/auth/change-password', auth, [
     dbRun("UPDATE users SET password = ?, token_version = token_version + 1, updated_at = datetime('now') WHERE id = ?", [hashed, req.userId]);
     res.json({ message: '密码已修改' });
   } catch (err) {
-    res.status(500).json({ error: '服务器错误' });
+    logError('change_password_failed', err, req);
+    res.status(500).json({ error: '密码修改失败，请稍后重试' });
   }
 });
 
-// DeepSeek proxy — avoids browser CORS failures on Netlify static frontend.
-app.post('/api/ai/models', aiLimiter, [
-  body('apiKey').isString().trim().matches(DEEPSEEK_KEY_RE).withMessage('请填写有效的 DeepSeek API Key'),
-], async (req, res) => {
-  if (!validateRequest(req, res)) return;
-  const apiKey = String(req.body?.apiKey || '').trim();
-  if (!validateDeepSeekKey(apiKey)) return res.status(400).json({ error: '请填写有效的 DeepSeek API Key' });
+// DeepSeek BYOK proxy: each user supplies their own key. The server never stores
+// the key and deliberately keeps it out of request bodies and application logs.
+app.post('/api/ai/models', auth, aiIpLimiter, aiUserLimiter, requireDeepSeekKey, async (req, res) => {
+  const apiKey = readDeepSeekKey(req);
 
   try {
     const { response: upstream, text } = await fetchTextWithTimeout(DEEPSEEK_MODELS_URL, {
       headers: { Authorization: `Bearer ${apiKey}` },
-    }, DEEPSEEK_MODELS_TIMEOUT_MS);
+    }, DEEPSEEK_MODELS_TIMEOUT_MS, req, res);
     sendDeepSeekResponse(res, upstream, text);
   } catch (err) {
-    console.error('DeepSeek models proxy error:', err);
+    logError('deepseek_models_failed', err, req);
     const status = err?.name === 'AbortError' ? 504 : 502;
-    res.status(status).json({ error: '无法连接 DeepSeek，请稍后重试或检查服务器网络' });
+    const message = err?.code === 'UPSTREAM_RESPONSE_TOO_LARGE'
+      ? 'DeepSeek 返回内容过大，请稍后重试'
+      : '无法连接 DeepSeek，请稍后重试或检查服务器网络';
+    res.status(status).json({ error: message });
   }
 });
 
-app.post('/api/ai/chat', auth, aiLimiter, [
-  body('apiKey').isString().trim().matches(DEEPSEEK_KEY_RE).withMessage('请先配置有效的 DeepSeek API Key'),
+app.post('/api/ai/chat', auth, aiIpLimiter, aiUserLimiter, requireDeepSeekKey, aiDailyQuota, aiConcurrencyGuard, [
   body('model').optional().isString().trim().isLength({ min: 1, max: 60 }).withMessage('模型名称不正确'),
   body('messages').isArray({ min: 1, max: 20 }).withMessage('对话内容不正确'),
 ], async (req, res) => {
   if (!validateRequest(req, res)) return;
-  const apiKey = String(req.body?.apiKey || '').trim();
+  const apiKey = readDeepSeekKey(req);
   const model = String(req.body?.model || 'deepseek-chat').trim();
   const messages = normalizeMessages(req.body?.messages);
   const temperature = clampNumber(req.body?.temperature, 0.7, 0, 2);
-  const max_tokens = Math.round(clampNumber(req.body?.max_tokens, 4096, 1, 8192));
+  const max_tokens = Math.round(clampNumber(req.body?.max_tokens, AI_MAX_TOKENS, 1, AI_MAX_TOKENS));
 
-  if (!validateDeepSeekKey(apiKey)) return res.status(400).json({ error: '请先配置有效的 DeepSeek API Key' });
   if (!ALLOWED_MODELS.has(model)) return res.status(400).json({ error: '模型不在允许列表内' });
   if (!messages) return res.status(400).json({ error: '对话内容过长或格式不正确' });
 
@@ -763,13 +1126,15 @@ app.post('/api/ai/chat', auth, aiLimiter, [
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify(requestBody),
-    }, DEEPSEEK_CHAT_TIMEOUT_MS);
+    }, DEEPSEEK_CHAT_TIMEOUT_MS, req, res);
     sendDeepSeekResponse(res, upstream, text);
   } catch (err) {
-    console.error('DeepSeek chat proxy error:', err);
+    logError('deepseek_chat_failed', err, req);
     const status = err?.name === 'AbortError' ? 504 : 502;
     const seconds = Math.round(DEEPSEEK_CHAT_TIMEOUT_MS / 1000);
-    const message = status === 504
+    const message = err?.code === 'UPSTREAM_RESPONSE_TOO_LARGE'
+      ? 'AI 返回内容过大，请减少行程天数或需求长度后重试'
+      : status === 504
       ? `AI 生成超过 ${seconds} 秒仍未完成，请切换极速模型、减少天数或稍后重试。`
       : 'AI 服务暂时不可达，请检查后端部署网络或稍后重试';
     res.status(status).json({ error: message });
@@ -786,20 +1151,32 @@ app.use('/api', (req, res) => {
 });
 
 // Static files — local dev only unless explicitly enabled.
-if (!isProduction || process.env.SERVE_STATIC === 'true') {
+const shouldServeStatic = !isProduction || truthyValues.has(String(process.env.SERVE_STATIC || '').trim().toLowerCase());
+if (shouldServeStatic) {
+  const staticIndex = path.join(STATIC_DIR, 'index.html');
+  if (!fs.existsSync(staticIndex)) {
+    throw new Error(`Static frontend entrypoint not found: ${staticIndex}`);
+  }
   app.use(express.static(STATIC_DIR));
   app.get('*', (req, res) => {
-    res.sendFile(path.join(STATIC_DIR, 'index.html'));
+    res.sendFile(staticIndex);
   });
 }
 
 app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({ error: '服务器错误' });
+  if (res.headersSent) return next(err);
+  logError('unhandled_request_error', err, req);
+  res.status(500).json({ error: '服务暂时不可用，请稍后重试' });
 });
 
 // ── Start ───────────────────────────────────────────
+if (isProduction && configuredOrigins.size === 0) {
+  console.warn(JSON.stringify({ level: 'warn', event: 'allowed_origins_empty', effect: 'browser_cross_origin_requests_blocked' }));
+}
+if (GEO_BLOCK_ENABLED && ALLOWED_COUNTRIES.size === 0 && BLOCKED_COUNTRIES.size === 0) {
+  console.warn(JSON.stringify({ level: 'warn', event: 'geo_policy_empty', effect: 'geo_filter_has_no_country_rules' }));
+}
 await initDB();
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`冰出行服务器运行中 http://0.0.0.0:${PORT}`);
+  console.log(`冰冰出行服务器运行中 http://0.0.0.0:${PORT}`);
 });

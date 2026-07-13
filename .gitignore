@@ -1,0 +1,16 @@
+node_modules/
+
+# Local secrets. Keep the documented placeholder file only.
+.env
+.env.*
+!.env.example
+
+# sql.js persistence and local runtime artifacts.
+data/
+*.db
+*.db-wal
+*.db-shm
+*.log
+.codex-server*
+.codex-test-data/
+

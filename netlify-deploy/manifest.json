@@ -1,15 +1,17 @@
 {
   "name": "冰冰出行",
   "short_name": "冰冰出行",
-  "description": "AI驱动的智能旅行规划工具",
-  "start_url": "/",
+  "description": "把一句旅行需求整理成可修改、可保存、可核验的行程草案",
+  "id": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
   "display_override": [
     "standalone",
-    "fullscreen"
+    "minimal-ui"
   ],
-  "theme_color": "#1A1A2E",
-  "background_color": "#FAFAFC",
+  "theme_color": "#4A6B62",
+  "background_color": "#FAF7F0",
   "lang": "zh-CN",
   "orientation": "any",
   "categories": [
@@ -30,16 +32,20 @@
       "purpose": "any maskable"
     }
   ],
-  "id": "com.bbcx.travel",
   "prefer_related_applications": false,
-  "related_applications": [
+  "shortcuts": [
     {
-      "platform": "play",
-      "id": "com.bbcx.travel"
+      "name": "开始规划",
+      "short_name": "开始规划",
+      "url": "/"
+    },
+    {
+      "name": "本机行程",
+      "short_name": "行程",
+      "url": "/#plans"
     }
   ],
   "launch_handler": {
     "client_mode": "navigate-existing"
-  },
-  "scope_extensions": []
+  }
 }
